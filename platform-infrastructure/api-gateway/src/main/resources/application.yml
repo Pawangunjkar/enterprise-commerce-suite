@@ -1,0 +1,179 @@
+server:
+  port: 8080
+spring:
+  threads:
+    virtual:
+      enabled: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: 6379
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://localhost:8081/realms/ecs}
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+            allowedHeaders: "*"
+            allowCredentials: true
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 40
+            redis-rate-limiter.burstCapacity: 80
+            key-resolver: "#{@ipKeyResolver}"
+      routes:
+        - id: payment-ws
+          uri: ${ECS_URI_PAY:http://localhost:8305}
+          predicates: [Path=/ws/payments/**]
+        - id: search
+          uri: ${ECS_URI_SEARCH:http://localhost:8090}
+          predicates: [Path=/api/v1/search/**]
+        - id: pincode
+          uri: ${ECS_URI_PINCODE:http://localhost:8091}
+          predicates: [Path=/api/v1/pincodes/**]
+        - id: cart-abandonment
+          uri: ${ECS_URI_CART_ABANDON:http://localhost:8407}
+          predicates: [Path=/api/v1/carts/abandonment/**]
+        - id: payment-webhooks
+          uri: ${ECS_URI_WEBHOOKS:http://localhost:8308}
+          predicates: [Path=/api/v1/payments/webhooks/**]
+        - id: products
+          uri: ${ECS_URI_PRODUCTS:http://localhost:8101}
+          predicates: [Path=/api/v1/products/**]
+        - id: catalog-variants
+          uri: ${ECS_URI_VARIANTS:http://localhost:8102}
+          predicates: [Path=/api/v1/catalog/variants/**]
+        - id: imei
+          uri: ${ECS_URI_IMEI:http://localhost:8103}
+          predicates: [Path=/api/v1/imei/**]
+        - id: catalog-b2b
+          uri: ${ECS_URI_B2B:http://localhost:8104}
+          predicates: [Path=/api/v1/catalog/b2b/**]
+        - id: catalog-bundles
+          uri: ${ECS_URI_BUNDLES:http://localhost:8105}
+          predicates: [Path=/api/v1/catalog/bundles/**]
+        - id: catalog-cpq
+          uri: ${ECS_URI_CPQ:http://localhost:8106}
+          predicates: [Path=/api/v1/catalog/cpq/**]
+        - id: catalog-schema
+          uri: ${ECS_URI_SCHEMA:http://localhost:8107}
+          predicates: [Path=/api/v1/catalog/schema/**]
+        - id: offers
+          uri: ${ECS_URI_OFFERS:http://localhost:8108}
+          predicates: [Path=/api/v1/offers/**]
+        - id: time-travel
+          uri: ${ECS_URI_TEMPORAL:http://localhost:8109}
+          predicates: [Path=/api/v1/catalog/time-travel/**]
+        - id: media
+          uri: ${ECS_URI_DAM:http://localhost:8110}
+          predicates: [Path=/api/v1/catalog/media/**]
+        - id: imports
+          uri: ${ECS_URI_IMPORT:http://localhost:8111}
+          predicates: [Path=/api/v1/catalog/imports/**]
+        - id: carts
+          uri: ${ECS_URI_CART:http://localhost:8201}
+          predicates: [Path=/api/v1/carts/**]
+        - id: checkout
+          uri: ${ECS_URI_CHECKOUT:http://localhost:8202}
+          predicates: [Path=/api/v1/checkout/**]
+        - id: orders
+          uri: ${ECS_URI_ORDERS:http://localhost:8203}
+          predicates: [Path=/api/v1/orders/**]
+        - id: prices
+          uri: ${ECS_URI_PRICES:http://localhost:8204}
+          predicates: [Path=/api/v1/prices/**]
+        - id: inventory
+          uri: ${ECS_URI_ATP:http://localhost:8205}
+          predicates: [Path=/api/v1/inventory/**]
+        - id: wms
+          uri: ${ECS_URI_WMS:http://localhost:8206}
+          predicates: [Path=/api/v1/wms/**]
+        - id: ondc
+          uri: ${ECS_URI_ONDC:http://localhost:8207}
+          predicates: [Path=/ondc/**]
+        - id: logistics
+          uri: ${ECS_URI_CARRIER:http://localhost:8208}
+          predicates: [Path=/api/v1/logistics/**]
+        - id: bopis
+          uri: ${ECS_URI_BOPIS:http://localhost:8209}
+          predicates: [Path=/api/v1/bopis/**]
+        - id: ndr
+          uri: ${ECS_URI_NDR:http://localhost:8210}
+          predicates: [Path=/api/v1/ndr/**]
+        - id: gst
+          uri: ${ECS_URI_GST:http://localhost:8301}
+          predicates: [Path=/api/v1/gst/**]
+        - id: tcs
+          uri: ${ECS_URI_TCS:http://localhost:8302}
+          predicates: [Path=/api/v1/tcs/**]
+        - id: price-books
+          uri: ${ECS_URI_PRICEBOOK:http://localhost:8303}
+          predicates: [Path=/api/v1/price-books/**]
+        - id: emi
+          uri: ${ECS_URI_EMI:http://localhost:8304}
+          predicates: [Path=/api/v1/emi/**]
+        - id: payments
+          uri: ${ECS_URI_PAY:http://localhost:8305}
+          predicates: [Path=/api/v1/payments/**]
+        - id: cod
+          uri: ${ECS_URI_COD:http://localhost:8307}
+          predicates: [Path=/api/v1/cod/**]
+        - id: invoices
+          uri: ${ECS_URI_INVOICE:http://localhost:8309}
+          predicates: [Path=/api/v1/invoices/**]
+        - id: ledger
+          uri: ${ECS_URI_LEDGER:http://localhost:8310}
+          predicates: [Path=/api/v1/ledger/**]
+        - id: dunning
+          uri: ${ECS_URI_DUNNING:http://localhost:8311}
+          predicates: [Path=/api/v1/dunning/**]
+        - id: customers
+          uri: ${ECS_URI_CUSTOMERS:http://localhost:8401}
+          predicates: [Path=/api/v1/customers/**]
+        - id: assisted-sales
+          uri: ${ECS_URI_ASSISTED:http://localhost:8402}
+          predicates: [Path=/api/v1/assisted-sales/**]
+        - id: accounts
+          uri: ${ECS_URI_ACCOUNTS:http://localhost:8403}
+          predicates: [Path=/api/v1/accounts/**]
+        - id: addresses
+          uri: ${ECS_URI_ADDRESSES:http://localhost:8404}
+          predicates: [Path=/api/v1/addresses/**]
+        - id: tickets
+          uri: ${ECS_URI_TICKETS:http://localhost:8405}
+          predicates: [Path=/api/v1/tickets/**]
+        - id: loyalty
+          uri: ${ECS_URI_LOYALTY:http://localhost:8406}
+          predicates: [Path=/api/v1/loyalty/**]
+        - id: dpdp
+          uri: ${ECS_URI_DPDP:http://localhost:8408}
+          predicates: [Path=/api/v1/dpdp/**]
+        - id: dlq
+          uri: ${ECS_URI_DLQ:http://localhost:8092}
+          predicates: [Path=/api/v1/dlq/**]
+        - id: audit
+          uri: ${ECS_URI_AUDIT:http://localhost:8093}
+          predicates: [Path=/api/v1/audit/**]
+        - id: notify
+          uri: ${ECS_URI_NOTIFY:http://localhost:8094}
+          predicates: [Path=/api/v1/notifications/**]
+ecs:
+  security:
+    enabled: ${ECS_SECURITY_ENABLED:false}
+  rate-limit:
+    public-replenish: 80
+    public-burst: 160

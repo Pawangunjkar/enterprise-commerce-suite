@@ -1,0 +1,14 @@
+package com.ecs.saga;
+
+public enum CheckoutSagaState {
+    CART_VALIDATED,
+    ATP_LOCKED,
+    PAYMENT_AUTHORIZED,
+    COD_VERIFIED,
+    WAREHOUSE_ROUTED,
+    DISPATCHED,
+    PAYMENT_CAPTURED,
+    COMPLETED,
+    COMPENSATING,
+    FAILED
+}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="ecs-products" version="1.6">
+  <field name="id" type="string" indexed="true" stored="true" required="true"/>
+  <field name="sku_s" type="string" indexed="true" stored="true"/>
+  <field name="name_txt_en" type="text_general" indexed="true" stored="true"/>
+  <field name="name_txt_hi" type="text_general" indexed="true" stored="true"/>
+  <field name="brand_s" type="string" indexed="true" stored="true"/>
+  <field name="category_path_s" type="string" indexed="true" stored="true"/>
+  <field name="hsn_s" type="string" indexed="true" stored="true"/>
+  <field name="status_s" type="string" indexed="true" stored="true"/>
+  <field name="list_price_f" type="pfloat" indexed="true" stored="true"/>
+  <field name="effective_from_dt" type="pdate" indexed="true" stored="true"/>
+  <field name="effective_to_dt" type="pdate" indexed="true" stored="true"/>
+  <dynamicField name="attr_*_s" type="string" indexed="true" stored="true"/>
+  <dynamicField name="attr_*_i" type="pint" indexed="true" stored="true"/>
+  <dynamicField name="attr_*_f" type="pfloat" indexed="true" stored="true"/>
+  <uniqueKey>id</uniqueKey>
+  <fieldType name="string" class="solr.StrField" sortMissingLast="true"/>
+  <fieldType name="boolean" class="solr.BoolField"/>
+  <fieldType name="pint" class="solr.IntPointField"/>
+  <fieldType name="pfloat" class="solr.FloatPointField"/>
+  <fieldType name="pdate" class="solr.DatePointField"/>
+  <fieldType name="text_general" class="solr.TextField">
+    <analyzer>
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+  </fieldType>
+</schema>

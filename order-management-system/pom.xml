@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.ecs</groupId>
+        <artifactId>enterprise-commerce-suite</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>order-management-system</artifactId>
+    <packaging>pom</packaging>
+    <name>Order Management System</name>
+    <modules>
+        <module>cart-service</module>
+        <module>checkout-service</module>
+        <module>order-orchestrator</module>
+        <module>dynamic-price-engine</module>
+        <module>atp-inventory-service</module>
+        <module>wms-fulfillment-service</module>
+        <module>ondc-seller-gateway</module>
+        <module>carrier-logistics-service</module>
+        <module>bopis-pickup-service</module>
+        <module>ndr-returns-rma-service</module>
+        <module>catalog-consumer-service</module>
+    </modules>
+</project>

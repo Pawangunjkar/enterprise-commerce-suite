@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.ecs</groupId>
+        <artifactId>enterprise-commerce-suite</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>platform-infrastructure</artifactId>
+    <packaging>pom</packaging>
+    <name>Platform Infrastructure</name>
+    <modules>
+        <module>shared-libraries</module>
+        <module>api-gateway</module>
+        <module>search-solr-indexer</module>
+        <module>notification-service</module>
+        <module>kafka-dlq-manager</module>
+        <module>pincode-master-service</module>
+        <module>mca-audit-trail-service</module>
+    </modules>
+</project>

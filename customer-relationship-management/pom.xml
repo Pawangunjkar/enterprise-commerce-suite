@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.ecs</groupId>
+        <artifactId>enterprise-commerce-suite</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>customer-relationship-management</artifactId>
+    <packaging>pom</packaging>
+    <name>Customer Relationship Management</name>
+    <modules>
+        <module>customer-360-service</module>
+        <module>assisted-sales-service</module>
+        <module>account-hierarchy-service</module>
+        <module>contact-address-service</module>
+        <module>support-ticket-service</module>
+        <module>loyalty-rewards-service</module>
+        <module>cart-abandonment-service</module>
+        <module>dpdp-compliance-service</module>
+    </modules>
+</project>

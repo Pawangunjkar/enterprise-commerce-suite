@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.ecs</groupId>
+        <artifactId>enterprise-commerce-suite</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>billing-system</artifactId>
+    <packaging>pom</packaging>
+    <name>Billing System</name>
+    <modules>
+        <module>gst-tax-engine</module>
+        <module>tcs-tds-compliance-engine</module>
+        <module>price-book-service</module>
+        <module>subscription-emi-service</module>
+        <module>payment-gateway-service</module>
+        <module>payment-gateway-plugins</module>
+        <module>cod-remittance-reconcile-service</module>
+        <module>webhook-reconciliation-service</module>
+        <module>invoice-service</module>
+        <module>general-ledger-service</module>
+        <module>dunning-service</module>
+    </modules>
+</project>

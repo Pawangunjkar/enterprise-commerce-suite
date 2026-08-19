@@ -1,0 +1,98 @@
+# Shared backing services. Apps join the same network via docker-compose.apps.yml.
+#   docker compose -f docker-compose.infra.yml -f docker-compose.apps.yml up -d --build
+
+name: ecs
+
+networks:
+  ecs:
+    name: ecs-net
+
+volumes:
+  ecs-pg:
+  ecs-redis:
+  ecs-minio:
+  ecs-solr:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ecs
+      POSTGRES_PASSWORD: ecs_secret
+    ports: ["5432:5432"]
+    volumes:
+      - ecs-pg:/var/lib/postgresql/data
+      - ./ops/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecs"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [ecs]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    volumes: [ecs-redis:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [ecs]
+
+  kafka:
+    image: apache/kafka:3.8.0
+    ports: ["9092:9092"]
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19092,PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:19092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      CLUSTER_ID: ecsKRaftCluster01
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    networks: [ecs]
+
+  solr:
+    image: solr:9.7
+    ports: ["8983:8983"]
+    command: solr-precreate products
+    volumes: [ecs-solr:/var/solr]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8983/solr/products/admin/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [ecs]
+
+  minio:
+    image: minio/minio:RELEASE.2024-11-07T00-52-20Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ecs
+      MINIO_ROOT_PASSWORD: ecs_secret_minio
+    ports: ["9000:9000", "9001:9001"]
+    volumes: [ecs-minio:/data]
+    networks: [ecs]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports: ["8081:8080"]
+    volumes:
+      - ./platform-infrastructure/auth-server-keycloak/ecs-realm.json:/opt/keycloak/data/import/ecs-realm.json
+    networks: [ecs]

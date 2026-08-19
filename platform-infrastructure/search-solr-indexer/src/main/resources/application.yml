@@ -1,0 +1,36 @@
+server:
+  port: 8090
+spring:
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+  application:
+    name: search-solr-indexer
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecs_platform
+    username: ecs
+    password: ecs_secret
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: search-solr-indexer
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/ecs
+
+ecs:
+  solr:
+    zk-host: localhost:2181
+    collection: products
+    base-url: ${ECS_SOLR_BASE_URL:http://localhost:8983/solr}

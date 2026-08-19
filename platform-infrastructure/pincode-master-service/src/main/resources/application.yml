@@ -1,0 +1,32 @@
+server:
+  port: 8091
+spring:
+  application:
+    name: pincode-master-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecs_platform
+    username: ecs
+    password: ecs_secret
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: Asia/Kolkata
+  flyway:
+    enabled: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: pincode-master-service
+      auto-offset-reset: earliest
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/ecs
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics

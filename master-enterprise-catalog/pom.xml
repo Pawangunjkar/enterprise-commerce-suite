@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.ecs</groupId>
+        <artifactId>enterprise-commerce-suite</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>master-enterprise-catalog</artifactId>
+    <packaging>pom</packaging>
+    <name>Master Enterprise Catalog</name>
+    <modules>
+        <module>product-service</module>
+        <module>variant-matrix-service</module>
+        <module>serial-imei-tracking-service</module>
+        <module>b2b-tiered-catalog-service</module>
+        <module>component-bundle-service</module>
+        <module>cpq-rule-engine</module>
+        <module>dynamic-schema-engine</module>
+        <module>offer-promotion-service</module>
+        <module>temporal-activation-service</module>
+        <module>media-dam-service</module>
+        <module>bulk-catalog-import-service</module>
+        <module>catalog-sync-publisher</module>
+    </modules>
+</project>

@@ -1,0 +1,5 @@
+CREATE DATABASE ecs_platform;
+CREATE DATABASE ecs_mec;
+CREATE DATABASE ecs_oms;
+CREATE DATABASE ecs_billing;
+CREATE DATABASE ecs_crm;

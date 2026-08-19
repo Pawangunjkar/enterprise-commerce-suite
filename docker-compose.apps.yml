@@ -1,0 +1,1157 @@
+# Full microservice stack. Package JARs first: mvn -DskipTests package
+# docker compose -f docker-compose.infra.yml -f docker-compose.apps.yml up -d --build
+
+name: ecs
+
+networks:
+  ecs:
+    name: ecs-net
+
+x-jvm-env: &jvm-env
+  SPRING_THREADS_VIRTUAL_ENABLED: "true"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:19092
+  SPRING_DATA_REDIS_HOST: redis
+  SPRING_DATASOURCE_USERNAME: ecs
+  SPRING_DATASOURCE_PASSWORD: ecs_secret
+  ECS_SECURITY_ENABLED: "false"
+  ECS_SOLR_BASE_URL: http://solr:8983/solr
+
+x-depends: &depends
+  postgres:
+    condition: service_healthy
+  redis:
+    condition: service_healthy
+  kafka:
+    condition: service_started
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: platform-infrastructure/api-gateway/target/api-gateway-1.0.0-SNAPSHOT.jar
+    image: ecs/api-gateway:1.0.0-SNAPSHOT
+    ports: ["8080:8080"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8080"
+      ECS_URI_SEARCH: http://search-solr-indexer:8090
+      ECS_URI_PINCODE: http://pincode-master-service:8091
+      ECS_URI_CART_ABANDON: http://cart-abandonment-service:8407
+      ECS_URI_WEBHOOKS: http://webhook-reconciliation-service:8308
+      ECS_URI_PRODUCTS: http://product-service:8101
+      ECS_URI_VARIANTS: http://variant-matrix-service:8102
+      ECS_URI_IMEI: http://serial-imei-tracking-service:8103
+      ECS_URI_B2B: http://b2b-tiered-catalog-service:8104
+      ECS_URI_BUNDLES: http://component-bundle-service:8105
+      ECS_URI_CPQ: http://cpq-rule-engine:8106
+      ECS_URI_SCHEMA: http://dynamic-schema-engine:8107
+      ECS_URI_OFFERS: http://offer-promotion-service:8108
+      ECS_URI_TEMPORAL: http://temporal-activation-service:8109
+      ECS_URI_DAM: http://media-dam-service:8110
+      ECS_URI_IMPORT: http://bulk-catalog-import-service:8111
+      ECS_URI_CART: http://cart-service:8201
+      ECS_URI_CHECKOUT: http://checkout-service:8202
+      ECS_URI_ORDERS: http://order-orchestrator:8203
+      ECS_URI_PRICES: http://dynamic-price-engine:8204
+      ECS_URI_ATP: http://atp-inventory-service:8205
+      ECS_URI_WMS: http://wms-fulfillment-service:8206
+      ECS_URI_ONDC: http://ondc-seller-gateway:8207
+      ECS_URI_CARRIER: http://carrier-logistics-service:8208
+      ECS_URI_BOPIS: http://bopis-pickup-service:8209
+      ECS_URI_NDR: http://ndr-returns-rma-service:8210
+      ECS_URI_GST: http://gst-tax-engine:8301
+      ECS_URI_TCS: http://tcs-tds-compliance-engine:8302
+      ECS_URI_PRICEBOOK: http://price-book-service:8303
+      ECS_URI_EMI: http://subscription-emi-service:8304
+      ECS_URI_PAY: http://payment-gateway-service:8305
+      ECS_URI_COD: http://cod-remittance-reconcile-service:8307
+      ECS_URI_INVOICE: http://invoice-service:8309
+      ECS_URI_LEDGER: http://general-ledger-service:8310
+      ECS_URI_DUNNING: http://dunning-service:8311
+      ECS_URI_CUSTOMERS: http://customer-360-service:8401
+      ECS_URI_ASSISTED: http://assisted-sales-service:8402
+      ECS_URI_ACCOUNTS: http://account-hierarchy-service:8403
+      ECS_URI_ADDRESSES: http://contact-address-service:8404
+      ECS_URI_TICKETS: http://support-ticket-service:8405
+      ECS_URI_LOYALTY: http://loyalty-rewards-service:8406
+      ECS_URI_DPDP: http://dpdp-compliance-service:8408
+      ECS_URI_DLQ: http://kafka-dlq-manager:8092
+      ECS_URI_AUDIT: http://mca-audit-trail-service:8093
+      ECS_URI_NOTIFY: http://notification-service:8094
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/ecs
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  search-solr-indexer:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: platform-infrastructure/search-solr-indexer/target/search-solr-indexer-1.0.0-SNAPSHOT.jar
+    image: ecs/search-solr-indexer:1.0.0-SNAPSHOT
+    ports: ["8090:8090"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8090"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8090/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  pincode-master-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: platform-infrastructure/pincode-master-service/target/pincode-master-service-1.0.0-SNAPSHOT.jar
+    image: ecs/pincode-master-service:1.0.0-SNAPSHOT
+    ports: ["8091:8091"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8091"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecs_platform
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  kafka-dlq-manager:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: platform-infrastructure/kafka-dlq-manager/target/kafka-dlq-manager-1.0.0-SNAPSHOT.jar
+    image: ecs/kafka-dlq-manager:1.0.0-SNAPSHOT
+    ports: ["8092:8092"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8092"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecs_platform
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8092/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  mca-audit-trail-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: platform-infrastructure/mca-audit-trail-service/target/mca-audit-trail-service-1.0.0-SNAPSHOT.jar
+    image: ecs/mca-audit-trail-service:1.0.0-SNAPSHOT
+    ports: ["8093:8093"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8093"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecs_platform
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8093/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: platform-infrastructure/notification-service/target/notification-service-1.0.0-SNAPSHOT.jar
+    image: ecs/notification-service:1.0.0-SNAPSHOT
+    ports: ["8094:8094"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8094"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8094/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  product-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/product-service/target/product-service-1.0.0-SNAPSHOT.jar
+    image: ecs/product-service:1.0.0-SNAPSHOT
+    ports: ["8101:8101"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8101"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecs_mec
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8101/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  variant-matrix-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/variant-matrix-service/target/variant-matrix-service-1.0.0-SNAPSHOT.jar
+    image: ecs/variant-matrix-service:1.0.0-SNAPSHOT
+    ports: ["8102:8102"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8102"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8102/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  serial-imei-tracking-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/serial-imei-tracking-service/target/serial-imei-tracking-service-1.0.0-SNAPSHOT.jar
+    image: ecs/serial-imei-tracking-service:1.0.0-SNAPSHOT
+    ports: ["8103:8103"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8103"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8103/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  b2b-tiered-catalog-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/b2b-tiered-catalog-service/target/b2b-tiered-catalog-service-1.0.0-SNAPSHOT.jar
+    image: ecs/b2b-tiered-catalog-service:1.0.0-SNAPSHOT
+    ports: ["8104:8104"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8104"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8104/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  component-bundle-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/component-bundle-service/target/component-bundle-service-1.0.0-SNAPSHOT.jar
+    image: ecs/component-bundle-service:1.0.0-SNAPSHOT
+    ports: ["8105:8105"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8105"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8105/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  cpq-rule-engine:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/cpq-rule-engine/target/cpq-rule-engine-1.0.0-SNAPSHOT.jar
+    image: ecs/cpq-rule-engine:1.0.0-SNAPSHOT
+    ports: ["8106:8106"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8106"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8106/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  dynamic-schema-engine:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/dynamic-schema-engine/target/dynamic-schema-engine-1.0.0-SNAPSHOT.jar
+    image: ecs/dynamic-schema-engine:1.0.0-SNAPSHOT
+    ports: ["8107:8107"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8107"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8107/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  offer-promotion-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/offer-promotion-service/target/offer-promotion-service-1.0.0-SNAPSHOT.jar
+    image: ecs/offer-promotion-service:1.0.0-SNAPSHOT
+    ports: ["8108:8108"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8108"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8108/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  temporal-activation-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/temporal-activation-service/target/temporal-activation-service-1.0.0-SNAPSHOT.jar
+    image: ecs/temporal-activation-service:1.0.0-SNAPSHOT
+    ports: ["8109:8109"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8109"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8109/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  media-dam-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/media-dam-service/target/media-dam-service-1.0.0-SNAPSHOT.jar
+    image: ecs/media-dam-service:1.0.0-SNAPSHOT
+    ports: ["8110:8110"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8110"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8110/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  bulk-catalog-import-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/bulk-catalog-import-service/target/bulk-catalog-import-service-1.0.0-SNAPSHOT.jar
+    image: ecs/bulk-catalog-import-service:1.0.0-SNAPSHOT
+    ports: ["8111:8111"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8111"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8111/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  catalog-sync-publisher:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: master-enterprise-catalog/catalog-sync-publisher/target/catalog-sync-publisher-1.0.0-SNAPSHOT.jar
+    image: ecs/catalog-sync-publisher:1.0.0-SNAPSHOT
+    ports: ["8112:8112"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8112"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8112/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  cart-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/cart-service/target/cart-service-1.0.0-SNAPSHOT.jar
+    image: ecs/cart-service:1.0.0-SNAPSHOT
+    ports: ["8201:8201"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8201"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8201/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  checkout-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/checkout-service/target/checkout-service-1.0.0-SNAPSHOT.jar
+    image: ecs/checkout-service:1.0.0-SNAPSHOT
+    ports: ["8202:8202"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8202"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8202/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  order-orchestrator:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/order-orchestrator/target/order-orchestrator-1.0.0-SNAPSHOT.jar
+    image: ecs/order-orchestrator:1.0.0-SNAPSHOT
+    ports: ["8203:8203"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8203"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8203/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  dynamic-price-engine:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/dynamic-price-engine/target/dynamic-price-engine-1.0.0-SNAPSHOT.jar
+    image: ecs/dynamic-price-engine:1.0.0-SNAPSHOT
+    ports: ["8204:8204"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8204"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8204/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  atp-inventory-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/atp-inventory-service/target/atp-inventory-service-1.0.0-SNAPSHOT.jar
+    image: ecs/atp-inventory-service:1.0.0-SNAPSHOT
+    ports: ["8205:8205"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8205"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8205/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  wms-fulfillment-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/wms-fulfillment-service/target/wms-fulfillment-service-1.0.0-SNAPSHOT.jar
+    image: ecs/wms-fulfillment-service:1.0.0-SNAPSHOT
+    ports: ["8206:8206"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8206"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8206/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  ondc-seller-gateway:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/ondc-seller-gateway/target/ondc-seller-gateway-1.0.0-SNAPSHOT.jar
+    image: ecs/ondc-seller-gateway:1.0.0-SNAPSHOT
+    ports: ["8207:8207"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8207"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8207/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  carrier-logistics-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/carrier-logistics-service/target/carrier-logistics-service-1.0.0-SNAPSHOT.jar
+    image: ecs/carrier-logistics-service:1.0.0-SNAPSHOT
+    ports: ["8208:8208"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8208"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8208/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  bopis-pickup-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/bopis-pickup-service/target/bopis-pickup-service-1.0.0-SNAPSHOT.jar
+    image: ecs/bopis-pickup-service:1.0.0-SNAPSHOT
+    ports: ["8209:8209"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8209"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8209/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  ndr-returns-rma-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/ndr-returns-rma-service/target/ndr-returns-rma-service-1.0.0-SNAPSHOT.jar
+    image: ecs/ndr-returns-rma-service:1.0.0-SNAPSHOT
+    ports: ["8210:8210"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8210"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8210/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  catalog-consumer-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: order-management-system/catalog-consumer-service/target/catalog-consumer-service-1.0.0-SNAPSHOT.jar
+    image: ecs/catalog-consumer-service:1.0.0-SNAPSHOT
+    ports: ["8211:8211"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8211"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8211/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  gst-tax-engine:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/gst-tax-engine/target/gst-tax-engine-1.0.0-SNAPSHOT.jar
+    image: ecs/gst-tax-engine:1.0.0-SNAPSHOT
+    ports: ["8301:8301"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8301"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8301/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  tcs-tds-compliance-engine:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/tcs-tds-compliance-engine/target/tcs-tds-compliance-engine-1.0.0-SNAPSHOT.jar
+    image: ecs/tcs-tds-compliance-engine:1.0.0-SNAPSHOT
+    ports: ["8302:8302"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8302"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8302/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  price-book-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/price-book-service/target/price-book-service-1.0.0-SNAPSHOT.jar
+    image: ecs/price-book-service:1.0.0-SNAPSHOT
+    ports: ["8303:8303"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8303"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8303/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  subscription-emi-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/subscription-emi-service/target/subscription-emi-service-1.0.0-SNAPSHOT.jar
+    image: ecs/subscription-emi-service:1.0.0-SNAPSHOT
+    ports: ["8304:8304"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8304"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8304/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  payment-gateway-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/payment-gateway-service/target/payment-gateway-service-1.0.0-SNAPSHOT.jar
+    image: ecs/payment-gateway-service:1.0.0-SNAPSHOT
+    ports: ["8305:8305"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8305"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8305/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  payment-gateway-plugins:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/payment-gateway-plugins/target/payment-gateway-plugins-1.0.0-SNAPSHOT.jar
+    image: ecs/payment-gateway-plugins:1.0.0-SNAPSHOT
+    ports: ["8306:8306"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8306"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8306/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  cod-remittance-reconcile-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/cod-remittance-reconcile-service/target/cod-remittance-reconcile-service-1.0.0-SNAPSHOT.jar
+    image: ecs/cod-remittance-reconcile-service:1.0.0-SNAPSHOT
+    ports: ["8307:8307"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8307"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8307/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  webhook-reconciliation-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/webhook-reconciliation-service/target/webhook-reconciliation-service-1.0.0-SNAPSHOT.jar
+    image: ecs/webhook-reconciliation-service:1.0.0-SNAPSHOT
+    ports: ["8308:8308"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8308"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8308/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  invoice-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/invoice-service/target/invoice-service-1.0.0-SNAPSHOT.jar
+    image: ecs/invoice-service:1.0.0-SNAPSHOT
+    ports: ["8309:8309"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8309"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8309/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  general-ledger-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/general-ledger-service/target/general-ledger-service-1.0.0-SNAPSHOT.jar
+    image: ecs/general-ledger-service:1.0.0-SNAPSHOT
+    ports: ["8310:8310"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8310"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8310/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  dunning-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: billing-system/dunning-service/target/dunning-service-1.0.0-SNAPSHOT.jar
+    image: ecs/dunning-service:1.0.0-SNAPSHOT
+    ports: ["8311:8311"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8311"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8311/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  customer-360-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: customer-relationship-management/customer-360-service/target/customer-360-service-1.0.0-SNAPSHOT.jar
+    image: ecs/customer-360-service:1.0.0-SNAPSHOT
+    ports: ["8401:8401"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8401"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8401/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  assisted-sales-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: customer-relationship-management/assisted-sales-service/target/assisted-sales-service-1.0.0-SNAPSHOT.jar
+    image: ecs/assisted-sales-service:1.0.0-SNAPSHOT
+    ports: ["8402:8402"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8402"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8402/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  account-hierarchy-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: customer-relationship-management/account-hierarchy-service/target/account-hierarchy-service-1.0.0-SNAPSHOT.jar
+    image: ecs/account-hierarchy-service:1.0.0-SNAPSHOT
+    ports: ["8403:8403"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8403"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8403/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  contact-address-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: customer-relationship-management/contact-address-service/target/contact-address-service-1.0.0-SNAPSHOT.jar
+    image: ecs/contact-address-service:1.0.0-SNAPSHOT
+    ports: ["8404:8404"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8404"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8404/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  support-ticket-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: customer-relationship-management/support-ticket-service/target/support-ticket-service-1.0.0-SNAPSHOT.jar
+    image: ecs/support-ticket-service:1.0.0-SNAPSHOT
+    ports: ["8405:8405"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8405"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8405/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  loyalty-rewards-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: customer-relationship-management/loyalty-rewards-service/target/loyalty-rewards-service-1.0.0-SNAPSHOT.jar
+    image: ecs/loyalty-rewards-service:1.0.0-SNAPSHOT
+    ports: ["8406:8406"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8406"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8406/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  cart-abandonment-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: customer-relationship-management/cart-abandonment-service/target/cart-abandonment-service-1.0.0-SNAPSHOT.jar
+    image: ecs/cart-abandonment-service:1.0.0-SNAPSHOT
+    ports: ["8407:8407"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8407"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8407/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  dpdp-compliance-service:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.jvm
+      args:
+        JAR_FILE: customer-relationship-management/dpdp-compliance-service/target/dpdp-compliance-service-1.0.0-SNAPSHOT.jar
+    image: ecs/dpdp-compliance-service:1.0.0-SNAPSHOT
+    ports: ["8408:8408"]
+    environment:
+      <<: *jvm-env
+      SERVER_PORT: "8408"
+    depends_on:
+      <<: *depends
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8408/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [ecs]
+
+  ecommerce-storefront-portal:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.web
+      args:
+        APP_NAME: ecommerce-storefront-portal
+    ports: ["5173:80"]
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks: [ecs]
+
+  master-admin-portal:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.web
+      args:
+        APP_NAME: master-admin-portal
+    ports: ["5174:80"]
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks: [ecs]
+
+  catalog-admin-studio:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.web
+      args:
+        APP_NAME: catalog-admin-studio
+    ports: ["5175:80"]
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks: [ecs]
+
+  order-admin-portal:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.web
+      args:
+        APP_NAME: order-admin-portal
+    ports: ["5176:80"]
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks: [ecs]
+
+  billing-admin-portal:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.web
+      args:
+        APP_NAME: billing-admin-portal
+    ports: ["5177:80"]
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks: [ecs]
+
+  crm-admin-portal:
+    build:
+      context: .
+      dockerfile: ops/docker/Dockerfile.web
+      args:
+        APP_NAME: crm-admin-portal
+    ports: ["5178:80"]
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks: [ecs]
+
