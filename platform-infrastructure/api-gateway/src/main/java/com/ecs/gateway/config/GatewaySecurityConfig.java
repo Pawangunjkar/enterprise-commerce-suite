@@ -14,7 +14,7 @@ public class GatewaySecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(ex -> ex
-                        .pathMatchers("/actuator/**").permitAll()
+                        .pathMatchers("/actuator/**", "/__fallback").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/v1/search/**", "/api/v1/pincodes/**", "/api/v1/catalog/public/**").permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));

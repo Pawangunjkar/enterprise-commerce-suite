@@ -1,6 +1,7 @@
 package com.ecs.billing.gst.api;
 
 import com.ecs.billing.gst.GstCalculator;
+import com.ecs.billing.gst.GstTaxService;
 import com.ecs.common.core.api.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,11 +11,17 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/gst")
 public class GstController {
+    private final GstTaxService gstTaxService;
+
+    public GstController(GstTaxService gstTaxService) {
+        this.gstTaxService = gstTaxService;
+    }
+
     public record ComputeRequest(BigDecimal taxable, int slab, String originState, String destState, String hsn) {}
 
     @PostMapping("/compute")
     public ApiResponse<GstCalculator.GstBreakdown> compute(@RequestBody ComputeRequest request) {
-        return ApiResponse.ok(GstCalculator.compute(request.taxable(), request.slab(), request.originState(), request.destState()));
+        return ApiResponse.ok(gstTaxService.compute(request.taxable(), request.slab(), request.originState(), request.destState()));
     }
 
     @PostMapping("/eway-bill")

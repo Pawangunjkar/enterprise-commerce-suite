@@ -30,6 +30,10 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
       default-filters:
+        - name: CircuitBreaker
+          args:
+            name: ecsDownstream
+            fallbackUri: forward:/__fallback
         - name: RequestRateLimiter
           args:
             redis-rate-limiter.replenishRate: 40
