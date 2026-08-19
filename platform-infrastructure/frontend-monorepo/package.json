@@ -2,6 +2,12 @@
   "name": "ecs-frontend-monorepo",
   "private": true,
   "version": "1.0.0",
+  "license": "MIT",
+  "author": {
+    "name": "Pawan Gunjkar",
+    "email": "pawangunjkar@gmail.com",
+    "url": "https://github.com/Pawangunjkar"
+  },
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev": "turbo run dev",

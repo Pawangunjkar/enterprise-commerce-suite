@@ -9,7 +9,33 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Enterprise Commerce Suite</name>
-    <description>Open-source enterprise e-commerce platform for the Indian commerce ecosystem</description>
+    <description>Open-source enterprise e-commerce platform for the Indian commerce ecosystem. Owner: Pawan Gunjkar (pawangunjkar@gmail.com).</description>
+    <url>https://github.com/Pawangunjkar/enterprise-commerce-suite</url>
+    <inceptionYear>2026</inceptionYear>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>Pawangunjkar</id>
+            <name>Pawan Gunjkar</name>
+            <email>pawangunjkar@gmail.com</email>
+            <url>https://github.com/Pawangunjkar</url>
+            <roles>
+                <role>owner</role>
+            </roles>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/Pawangunjkar/enterprise-commerce-suite.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/Pawangunjkar/enterprise-commerce-suite.git</developerConnection>
+        <url>https://github.com/Pawangunjkar/enterprise-commerce-suite</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <modules>
         <module>platform-infrastructure</module>

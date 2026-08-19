@@ -1,6 +1,8 @@
 # Enterprise Commerce Suite
 
-Open-source enterprise e-commerce platform for the Indian commerce ecosystem. Five autonomous parent modules share contracts only through `platform-infrastructure/shared-libraries`.
+Open-source public project owned by **Pawan Gunjkar** (`pawangunjkar@gmail.com` · [GitHub](https://github.com/Pawangunjkar)).
+
+Open-source enterprise e-commerce platform for the Indian commerce ecosystem. Five autonomous parent modules share contracts only through `platform-infrastructure/shared-libraries`. Licensed under MIT. See `OWNER.md` and `LICENSE`.
 
 ## Architecture
 
@@ -102,3 +104,11 @@ Turborepo under `platform-infrastructure/frontend-monorepo/`:
 ## Tech stack
 
 Java 21 virtual-thread ready, Spring Boot 3.3.5, Spring Cloud 2023.0.3, PostgreSQL 16, Kafka KRaft, Solr 9.7, Redis 7, Keycloak 24, React 19, Vite 6, Tailwind, TanStack Query.
+
+## Owner
+
+- Name: Pawan Gunjkar
+- Email: pawangunjkar@gmail.com
+- GitHub: https://github.com/Pawangunjkar
+- Visibility: public open source (MIT)
+
