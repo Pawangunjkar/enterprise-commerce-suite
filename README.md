@@ -4,6 +4,8 @@ Open-source public project owned by **Pawan Gunjkar** (`pawangunjkar@gmail.com` 
 
 Open-source enterprise e-commerce platform for the Indian commerce ecosystem. Five autonomous parent modules share contracts only through `platform-infrastructure/shared-libraries`. Licensed under MIT. See `OWNER.md` and `LICENSE`.
 
+MCP servers: [enterprise-commerce-mcps](https://github.com/Pawangunjkar/enterprise-commerce-mcps). LangGraph business agents: [enterprise-commerce-agents](https://github.com/Pawangunjkar/enterprise-commerce-agents).
+
 ## Architecture
 
 ```mermaid
