@@ -54,6 +54,7 @@ services:
       ECS_URI_CART: http://cart-service:8201
       ECS_URI_CHECKOUT: http://checkout-service:8202
       ECS_URI_ORDERS: http://order-orchestrator:8203
+      ECS_URI_RECS: http://order-orchestrator:8203
       ECS_URI_PRICES: http://dynamic-price-engine:8204
       ECS_URI_ATP: http://atp-inventory-service:8205
       ECS_URI_WMS: http://wms-fulfillment-service:8206
@@ -506,6 +507,11 @@ services:
     environment:
       <<: *jvm-env
       SERVER_PORT: "8203"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecs_oms
+      ECS_ATP_URL: http://atp-inventory-service:8205
+      ECS_PAYMENT_URL: http://payment-gateway-service:8305
+      ECS_WMS_URL: http://wms-fulfillment-service:8206
+      ECS_INVOICE_URL: http://invoice-service:8309
     depends_on:
       <<: *depends
     healthcheck:
@@ -779,6 +785,7 @@ services:
     environment:
       <<: *jvm-env
       SERVER_PORT: "8305"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecs_billing
     depends_on:
       <<: *depends
     healthcheck:
@@ -863,6 +870,7 @@ services:
     environment:
       <<: *jvm-env
       SERVER_PORT: "8309"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecs_billing
     depends_on:
       <<: *depends
     healthcheck:

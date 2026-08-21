@@ -23,7 +23,7 @@ services = [
     ("catalog-sync-publisher", "master-enterprise-catalog/catalog-sync-publisher", 8112, None),
     ("cart-service", "order-management-system/cart-service", 8201, None),
     ("checkout-service", "order-management-system/checkout-service", 8202, None),
-    ("order-orchestrator", "order-management-system/order-orchestrator", 8203, None),
+    ("order-orchestrator", "order-management-system/order-orchestrator", 8203, "ecs_oms"),
     ("dynamic-price-engine", "order-management-system/dynamic-price-engine", 8204, None),
     ("atp-inventory-service", "order-management-system/atp-inventory-service", 8205, None),
     ("wms-fulfillment-service", "order-management-system/wms-fulfillment-service", 8206, None),
@@ -36,11 +36,11 @@ services = [
     ("tcs-tds-compliance-engine", "billing-system/tcs-tds-compliance-engine", 8302, None),
     ("price-book-service", "billing-system/price-book-service", 8303, None),
     ("subscription-emi-service", "billing-system/subscription-emi-service", 8304, None),
-    ("payment-gateway-service", "billing-system/payment-gateway-service", 8305, None),
+    ("payment-gateway-service", "billing-system/payment-gateway-service", 8305, "ecs_billing"),
     ("payment-gateway-plugins", "billing-system/payment-gateway-plugins", 8306, None),
     ("cod-remittance-reconcile-service", "billing-system/cod-remittance-reconcile-service", 8307, None),
     ("webhook-reconciliation-service", "billing-system/webhook-reconciliation-service", 8308, None),
-    ("invoice-service", "billing-system/invoice-service", 8309, None),
+    ("invoice-service", "billing-system/invoice-service", 8309, "ecs_billing"),
     ("general-ledger-service", "billing-system/general-ledger-service", 8310, None),
     ("dunning-service", "billing-system/dunning-service", 8311, None),
     ("customer-360-service", "customer-relationship-management/customer-360-service", 8401, None),
@@ -72,6 +72,7 @@ gw_env = {
     "ECS_URI_CART": "http://cart-service:8201",
     "ECS_URI_CHECKOUT": "http://checkout-service:8202",
     "ECS_URI_ORDERS": "http://order-orchestrator:8203",
+    "ECS_URI_RECS": "http://order-orchestrator:8203",
     "ECS_URI_PRICES": "http://dynamic-price-engine:8204",
     "ECS_URI_ATP": "http://atp-inventory-service:8205",
     "ECS_URI_WMS": "http://wms-fulfillment-service:8206",
@@ -149,6 +150,11 @@ for name, path, port, db in services:
     ]
     if db:
         lines.append(f"      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/{db}")
+    if name == "order-orchestrator":
+        lines.append("      ECS_ATP_URL: http://atp-inventory-service:8205")
+        lines.append("      ECS_PAYMENT_URL: http://payment-gateway-service:8305")
+        lines.append("      ECS_WMS_URL: http://wms-fulfillment-service:8206")
+        lines.append("      ECS_INVOICE_URL: http://invoice-service:8309")
     if name == "api-gateway":
         for key, value in gw_env.items():
             lines.append(f"      {key}: {value}")

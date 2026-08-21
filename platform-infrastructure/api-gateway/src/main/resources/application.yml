@@ -97,6 +97,9 @@ spring:
         - id: orders
           uri: ${ECS_URI_ORDERS:http://localhost:8203}
           predicates: [Path=/api/v1/orders/**]
+        - id: recommendations
+          uri: ${ECS_URI_RECS:http://localhost:8203}
+          predicates: [Path=/api/v1/recommendations/**]
         - id: prices
           uri: ${ECS_URI_PRICES:http://localhost:8204}
           predicates: [Path=/api/v1/prices/**]

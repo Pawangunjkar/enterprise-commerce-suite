@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS gst_invoice (
+    id UUID PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    tenant_id VARCHAR(64) NOT NULL DEFAULT 'default',
+    version BIGINT NOT NULL DEFAULT 0,
+    invoice_number VARCHAR(40) NOT NULL UNIQUE,
+    order_id UUID NOT NULL,
+    order_number VARCHAR(32) NOT NULL,
+    taxable_inr NUMERIC(12,2) NOT NULL,
+    cgst_inr NUMERIC(12,2) NOT NULL,
+    sgst_inr NUMERIC(12,2) NOT NULL,
+    igst_inr NUMERIC(12,2) NOT NULL,
+    total_inr NUMERIC(12,2) NOT NULL,
+    tax_type VARCHAR(16) NOT NULL,
+    slab INT NOT NULL,
+    origin_state VARCHAR(2) NOT NULL,
+    dest_state VARCHAR(2) NOT NULL,
+    hsn_code VARCHAR(8)
+);

@@ -91,6 +91,8 @@ Master admin: http://localhost:5174
 - **UPI**: Dynamic BharatQR `upi://pay?pa=...&cu=INR` with Base64 PNG and intent URLs for GPay / PhonePe / Paytm / CRED.
 - **Pincode**: serviceability, ODA flag, EDD from origin vs destination state.
 - **IMEI**: 15-digit Luhn validation on ingest.
+- **OMS checkout saga**: persists `commerce_order` + `checkout_saga`, then ATP lock → UPI authorize (or COD) → WMS wave → capture + GST invoice, with compensating unlock/void/cancel.
+- **Cross-sell / up-sell**: `POST /api/v1/recommendations` ranks affinity rules (frequently bought together) plus a same-family SKU ladder.
 - **DPDP Act 2023**: consent capture and anonymization endpoints.
 
 ## Frontend suite

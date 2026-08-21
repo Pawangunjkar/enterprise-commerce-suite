@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.util.Map;
+
 /**
  * Typed helper for service-to-service calls. Every request is rate-limited and circuit-broken.
  */
@@ -25,6 +27,19 @@ public class DownstreamClient {
 
     public <T> T getUrl(String url, Class<T> type) {
         return restClient.get().uri(url).retrieve().body(type);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> postUrl(String url, Object body) {
+        Map<String, Object> envelope = restClient.post().uri(url).body(body).retrieve().body(Map.class);
+        if (envelope == null) {
+            return Map.of();
+        }
+        Object data = envelope.get("data");
+        if (data instanceof Map<?, ?> map) {
+            return (Map<String, Object>) map;
+        }
+        return envelope;
     }
 
     public <T> T get(String path, Class<T> type) {
