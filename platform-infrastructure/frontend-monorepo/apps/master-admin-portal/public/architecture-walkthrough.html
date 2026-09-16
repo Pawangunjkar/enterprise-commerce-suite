@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ECS Architecture Walkthrough</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --stroke: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --mec: #a78bfa;
+      --oms: #34d399;
+      --bill: #fbbf24;
+      --crm: #f472b6;
+      --plat: #60a5fa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      border-bottom: 1px solid var(--stroke);
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    h1 { margin: 0; font-size: 1.25rem; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .tabs button {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      color: var(--text);
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .tabs button.active { border-color: var(--accent); color: var(--accent); }
+    main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+    .step-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .canvas {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      min-height: 320px;
+      overflow-x: auto;
+    }
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 0.75rem 0;
+    }
+    .box {
+      border: 1px solid var(--stroke);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      min-width: 140px;
+      max-width: 200px;
+      text-align: center;
+      background: #0b1220;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .box.active {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .box small { display: block; color: var(--muted); font-size: 0.72rem; margin-top: 0.35rem; }
+    .box.plat { border-left: 3px solid var(--plat); }
+    .box.mec { border-left: 3px solid var(--mec); }
+    .box.oms { border-left: 3px solid var(--oms); }
+    .box.bill { border-left: 3px solid var(--bill); }
+    .box.crm { border-left: 3px solid var(--crm); }
+    .arrow { color: var(--muted); font-size: 1.25rem; user-select: none; }
+    .layer-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .layer {
+      border: 1px dashed var(--stroke);
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+    }
+    .layer h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    .desc {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      background: #0b1220;
+      border: 1px solid var(--stroke);
+    }
+    .desc h2 { margin: 0 0 0.5rem; font-size: 1rem; }
+    nav.controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    nav.controls button {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      padding: 0.6rem 1.1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    nav.controls button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--stroke);
+    }
+    nav.controls button:disabled { opacity: 0.4; cursor: not-allowed; }
+    footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 2rem 1rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Enterprise Commerce Suite — Architecture Walkthrough</h1>
+    <div class="tabs" id="flowTabs"></div>
+  </header>
+  <main>
+    <div class="step-meta">
+      <span id="stepLabel">Step 1 of 1</span>
+      <span id="flowTitle"></span>
+    </div>
+    <div class="canvas" id="canvas"></div>
+    <div class="desc" id="description"></div>
+    <nav class="controls">
+      <button type="button" class="secondary" id="prevBtn">Previous</button>
+      <button type="button" id="nextBtn">Next</button>
+    </nav>
+  </main>
+  <footer>Open docs/architecture-walkthrough.html locally or host on GitHub Pages · MIT · Pawan Gunjkar</footer>
+
+  <script>
+    const FLOWS = {
+      overview: {
+        title: "Platform layers",
+        steps: [
+          {
+            title: "Experience layer",
+            text: "Six React 19 portals (storefront :5173, master admin :5174, catalog :5175, OMS :5176, billing :5177, CRM :5178) call a single API surface.",
+            layers: [
+              { name: "Experience", boxes: [
+                { label: "Storefront", sub: ":5173", cls: "plat" },
+                { label: "Admin consoles", sub: ":5174–5178", cls: "plat" }
+              ]}
+            ]
+          },
+          {
+            title: "Edge & security",
+            text: "Spring Cloud Gateway :8080 terminates TLS/CORS, JWT (Keycloak realm ecs), Redis token-bucket rate limits, and Resilience4j circuit breakers on every downstream hop.",
+            layers: [
+              { name: "Edge", boxes: [
+                { label: "API Gateway", sub: ":8080", cls: "plat" },
+                { label: "Keycloak", sub: ":8081", cls: "plat" }
+              ]}
+            ]
+          },
+          {
+            title: "Domain services",
+            text: "Four autonomous Maven parents — MEC, OMS, Billing, CRM — each with dedicated Postgres schemas. Contracts cross only via shared-libraries SPI/events.",
+            layers: [
+              { name: "Domains", boxes: [
+                { label: "MEC", sub: "8101–8111", cls: "mec" },
+                { label: "OMS", sub: "8201–8210", cls: "oms" },
+                { label: "Billing", sub: "8301–8311", cls: "bill" },
+                { label: "CRM", sub: "8401–8408", cls: "crm" }
+              ]}
+            ]
+          },
+          {
+            title: "Data & cache",
+            text: "PostgreSQL 16 JSONB per domain, Redis 7 for carts/prices/rate limits, MinIO for DAM assets.",
+            layers: [
+              { name: "Data", boxes: [
+                { label: "PostgreSQL", sub: ":5432", cls: "plat" },
+                { label: "Redis", sub: ":6379", cls: "plat" },
+                { label: "MinIO", sub: ":9000", cls: "plat" }
+              ]}
+            ]
+          },
+          {
+            title: "Events & search",
+            text: "Kafka KRaft publishes catalog/offer/order CloudEvents. search-solr-indexer consumes and feeds Solr 9 faceted product index.",
+            layers: [
+              { name: "Events", boxes: [
+                { label: "Kafka", sub: ":9092", cls: "plat" },
+                { label: "Solr indexer", sub: ":8090", cls: "mec" },
+                { label: "Solr Cloud", sub: ":8983", cls: "mec" }
+              ]}
+            ]
+          }
+        ]
+      },
+      checkout: {
+        title: "Delhi UPI checkout saga",
+        steps: [
+          { title: "Serviceability", text: "Buyer enters pincode 110001. pincode-master-service returns EDD, ODA flag, origin HR → dest DL.", boxes: [
+            { label: "Storefront", cls: "plat" }, { label: "Gateway", cls: "plat" }, { label: "Pincode", cls: "oms" }
+          ]},
+          { title: "Cart & price", text: "cart-service persists lines in Redis. dynamic-price-engine applies offers + loyalty.", boxes: [
+            { label: "Cart", cls: "oms" }, { label: "Price engine", cls: "oms" }
+          ]},
+          { title: "GST", text: "gst-tax-engine computes IGST 18% on HSN 8517 for inter-state HR→DL shipment.", boxes: [
+            { label: "GST engine", cls: "bill" }
+          ]},
+          { title: "Place order", text: "order-orchestrator persists commerce_order + checkout_saga, then runs SagaOrchestrator steps.", boxes: [
+            { label: "Order orchestrator", cls: "oms" }, { label: "Postgres OMS", cls: "plat" }
+          ]},
+          { title: "ATP lock", text: "atp-inventory-service locks SKU-PHONE-8-128-BLACK at warehouse NDC-HR. Failure aborts saga.", boxes: [
+            { label: "ATP", cls: "oms" }, { label: "Redis lock", cls: "plat" }
+          ]},
+          { title: "Payment", text: "payment-gateway-service mints BharatQR; simulate_success captures UPI in lab.", boxes: [
+            { label: "BharatQR", cls: "bill" }, { label: "WebSocket status", cls: "bill" }
+          ]},
+          { title: "Fulfillment", text: "wms-fulfillment-service creates pick wave; invoice-service posts GST invoice on capture.", boxes: [
+            { label: "WMS wave", cls: "oms" }, { label: "Invoice + GL", cls: "bill" }
+          ]},
+          { title: "Compensation", text: "On failure: unlock ATP → void payment → cancel wave. Saga state stored in checkout_saga table.", boxes: [
+            { label: "Compensate", cls: "oms" }
+          ]}
+        ]
+      },
+      catalog: {
+        title: "MEC catalog publish",
+        steps: [
+          { title: "Author SKU", text: "product-service creates draft with HSN, category path, list price INR.", boxes: [
+            { label: "Catalog studio", cls: "plat" }, { label: "product-service", cls: "mec" }
+          ]},
+          { title: "Activate", text: "activate_product flips SKU live; validates schema via dynamic-schema-engine when needed.", boxes: [
+            { label: "Activate API", cls: "mec" }
+          ]},
+          { title: "IMEI ingest", text: "serial-imei-tracking-service validates 15-digit Luhn for handset SKUs.", boxes: [
+            { label: "IMEI service", cls: "mec" }
+          ]},
+          { title: "Offer / CPQ", text: "offer-promotion-service emits OfferActivatedEvent; cpq-rule-engine evaluates bundle rules.", boxes: [
+            { label: "Offers", cls: "mec" }, { label: "CPQ", cls: "mec" }, { label: "Kafka", cls: "plat" }
+          ]},
+          { title: "Search index", text: "search-solr-indexer consumes events and updates Solr facets (brand, RAM, price).", boxes: [
+            { label: "Indexer", cls: "plat" }, { label: "Solr", cls: "mec" }
+          ]},
+          { title: "OMS consumer", text: "catalog-consumer-service hydrates OMS catalog cache for cart/checkout.", boxes: [
+            { label: "OMS consumer", cls: "oms" }
+          ]}
+        ]
+      },
+      crm: {
+        title: "CRM 360 assisted desk",
+        steps: [
+          { title: "OTP identity", text: "customer-360-service otp_start / otp_verify (lab OTP 123456) for Indian mobile.", boxes: [
+            { label: "CRM desk", cls: "plat" }, { label: "Customer 360", cls: "crm" }
+          ]},
+          { title: "KYC profile", text: "upsert_profile stores PAN/GSTIN/name; get_profile returns merged dossier.", boxes: [
+            { label: "Profile API", cls: "crm" }
+          ]},
+          { title: "DPDP consent", text: "dpdp-compliance-service records purpose-limited consent (ORDER, MARKETING, ASSISTED).", boxes: [
+            { label: "DPDP", cls: "crm" }
+          ]},
+          { title: "Loyalty & hierarchy", text: "loyalty-rewards-service applies festival multiplier; account-hierarchy-service loads B2B tree.", boxes: [
+            { label: "Loyalty", cls: "crm" }, { label: "Account tree", cls: "crm" }
+          ]},
+          { title: "Assisted pay-link", text: "assisted-sales-service mints WhatsApp pay-link after enrichment.", boxes: [
+            { label: "Pay-link", cls: "crm" }
+          ]},
+          { title: "Recovery", text: "support-ticket-service + cart-abandonment-service for desk follow-up.", boxes: [
+            { label: "Tickets", cls: "crm" }, { label: "Abandonment", cls: "crm" }
+          ]}
+        ]
+      },
+      agents: {
+        title: "MCP + LangGraph operators",
+        steps: [
+          { title: "Suite APIs", text: "Each Spring Boot app exposes REST under /api/v1/* via gateway :8080.", boxes: [
+            { label: "ECS Suite", cls: "plat" }
+          ]},
+          { title: "MCP layer", text: "enterprise-commerce-mcps — 54 FastMCP stdio servers wrap HTTP with typed tools.", boxes: [
+            { label: "FastMCP", cls: "plat" }, { label: "Cursor / IDE", cls: "plat" }
+          ]},
+          { title: "Agent layer", text: "enterprise-commerce-agents — LangGraph ReAct operators with enrichment playbooks.", boxes: [
+            { label: "Journey agents", cls: "crm" }, { label: "Specialists", cls: "oms" }
+          ]},
+          { title: "Scenario runner", text: "YAML playbooks (checkout-delhi-upi, mec-catalog-lifecycle, crm-assisted-sales) call MCP in order.", boxes: [
+            { label: "Scenarios", cls: "plat" }
+          ]}
+        ]
+      }
+    };
+
+    let flowKey = "overview";
+    let stepIndex = 0;
+
+    const tabsEl = document.getElementById("flowTabs");
+    const canvasEl = document.getElementById("canvas");
+    const descEl = document.getElementById("description");
+    const stepLabel = document.getElementById("stepLabel");
+    const flowTitle = document.getElementById("flowTitle");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function renderTabs() {
+      tabsEl.innerHTML = "";
+      Object.entries(FLOWS).forEach(([key, flow]) => {
+        const btn = document.createElement("button");
+        btn.textContent = flow.title;
+        btn.className = key === flowKey ? "active" : "";
+        btn.onclick = () => { flowKey = key; stepIndex = 0; render(); };
+        tabsEl.appendChild(btn);
+      });
+    }
+
+    function boxHtml(box, active) {
+      return `<div class="box ${box.cls}${active ? " active" : ""}"><strong>${box.label}</strong><small>${box.sub || ""}</small></div>`;
+    }
+
+    function renderCanvas(step) {
+      if (step.layers) {
+        canvasEl.innerHTML = `<div class="layer-grid">${step.layers.map(layer => `
+          <div class="layer"><h3>${layer.name}</h3>
+            <div class="flow-row">${layer.boxes.map((b,i) => boxHtml(b, i === layer.boxes.length - 1)).join('<span class="arrow">→</span>')}</div>
+          </div>`).join("")}</div>`;
+        return;
+      }
+      const boxes = step.boxes || [];
+      canvasEl.innerHTML = `<div class="flow-row">${boxes.map((b,i) =>
+        `${boxHtml(b, i === boxes.length - 1)}${i < boxes.length - 1 ? '<span class="arrow">→</span>' : ''}`
+      ).join("")}</div>`;
+    }
+
+    function render() {
+      const flow = FLOWS[flowKey];
+      const step = flow.steps[stepIndex];
+      renderTabs();
+      flowTitle.textContent = flow.title;
+      stepLabel.textContent = `Step ${stepIndex + 1} of ${flow.steps.length}`;
+      renderCanvas(step);
+      descEl.innerHTML = `<h2>${step.title}</h2><p>${step.text}</p>`;
+      prevBtn.disabled = stepIndex === 0;
+      nextBtn.disabled = stepIndex === flow.steps.length - 1;
+      nextBtn.textContent = stepIndex === flow.steps.length - 1 ? "Done" : "Next";
+    }
+
+    prevBtn.onclick = () => { if (stepIndex > 0) { stepIndex--; render(); } };
+    nextBtn.onclick = () => {
+      const flow = FLOWS[flowKey];
+      if (stepIndex < flow.steps.length - 1) { stepIndex++; render(); }
+    };
+
+    render();
+  </script>
+</body>
+</html>

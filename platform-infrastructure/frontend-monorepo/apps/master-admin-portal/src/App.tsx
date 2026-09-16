@@ -1,4 +1,4 @@
-import { Card, Shell } from "@ecs/ui";
+import { ArchitectureDrawer, Card, Shell } from "@ecs/ui";
 
 const consoles = [
   { name: "Catalog Studio", href: "http://localhost:5175", desc: "SKU tree, IMEI, time-travel offers" },
@@ -9,7 +9,7 @@ const consoles = [
 
 export default function App() {
   return (
-    <Shell title="Unified Master Super-Admin">
+    <Shell title="Unified Master Super-Admin" actions={<ArchitectureDrawer />}>
       <div className="grid gap-4 md:grid-cols-4">
         {[
           ["GMV", "₹18.4 Cr"],
