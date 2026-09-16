@@ -19,73 +19,21 @@
       --plat: #60a5fa;
     }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-    }
-    header {
-      border-bottom: 1px solid var(--stroke);
-      padding: 1rem 1.5rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: center;
-      justify-content: space-between;
-    }
-    h1 { margin: 0; font-size: 1.25rem; }
-    .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .tabs button {
-      background: var(--panel);
-      border: 1px solid var(--stroke);
-      color: var(--text);
-      padding: 0.45rem 0.85rem;
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    header { border-bottom: 1px solid var(--stroke); padding: 1rem 1.5rem; }
+    header h1 { margin: 0 0 0.35rem; font-size: 1.25rem; }
+    header p { margin: 0; color: var(--muted); font-size: 0.9rem; max-width: 900px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+    .tabs button { background: var(--panel); border: 1px solid var(--stroke); color: var(--text); padding: 0.45rem 0.85rem; border-radius: 999px; cursor: pointer; font-size: 0.85rem; }
     .tabs button.active { border-color: var(--accent); color: var(--accent); }
     main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
-    .step-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-    .canvas {
-      background: var(--panel);
-      border: 1px solid var(--stroke);
-      border-radius: 1rem;
-      padding: 1.25rem;
-      min-height: 320px;
-      overflow-x: auto;
-    }
-    .flow-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin: 0.75rem 0;
-    }
-    .box {
-      border: 1px solid var(--stroke);
-      border-radius: 0.75rem;
-      padding: 0.75rem 1rem;
-      min-width: 140px;
-      max-width: 200px;
-      text-align: center;
-      background: #0b1220;
-      transition: transform 0.15s, border-color 0.15s;
-    }
-    .box.active {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
+    .flow-intro { background: #0b1220; border: 1px solid var(--stroke); border-radius: 0.75rem; padding: 1rem 1.1rem; margin-bottom: 1rem; color: var(--muted); font-size: 0.92rem; }
+    .flow-intro strong { color: var(--text); }
+    .step-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; color: var(--muted); font-size: 0.9rem; }
+    .canvas { background: var(--panel); border: 1px solid var(--stroke); border-radius: 1rem; padding: 1.25rem; min-height: 280px; overflow-x: auto; }
+    .flow-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin: 0.75rem 0; }
+    .box { border: 1px solid var(--stroke); border-radius: 0.75rem; padding: 0.75rem 1rem; min-width: 130px; max-width: 210px; text-align: center; background: #0b1220; transition: transform 0.15s, border-color 0.15s; }
+    .box.active { border-color: var(--accent); transform: translateY(-2px); }
     .box small { display: block; color: var(--muted); font-size: 0.72rem; margin-top: 0.35rem; }
     .box.plat { border-left: 3px solid var(--plat); }
     .box.mec { border-left: 3px solid var(--mec); }
@@ -93,43 +41,23 @@
     .box.bill { border-left: 3px solid var(--bill); }
     .box.crm { border-left: 3px solid var(--crm); }
     .arrow { color: var(--muted); font-size: 1.25rem; user-select: none; }
-    .layer-grid {
-      display: grid;
-      gap: 0.75rem;
-    }
-    .layer {
-      border: 1px dashed var(--stroke);
-      border-radius: 0.75rem;
-      padding: 0.75rem;
-    }
+    .layer-grid { display: grid; gap: 0.75rem; }
+    .layer { border: 1px dashed var(--stroke); border-radius: 0.75rem; padding: 0.75rem; }
     .layer h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
-    .desc {
-      margin-top: 1rem;
-      padding: 1rem;
-      border-radius: 0.75rem;
-      background: #0b1220;
-      border: 1px solid var(--stroke);
-    }
-    .desc h2 { margin: 0 0 0.5rem; font-size: 1rem; }
-    nav.controls {
-      display: flex;
-      gap: 0.75rem;
-      margin-top: 1rem;
-    }
-    nav.controls button {
-      background: var(--accent);
-      color: #0f172a;
-      border: none;
-      padding: 0.6rem 1.1rem;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    nav.controls button.secondary {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--stroke);
-    }
+    .desc { margin-top: 1rem; padding: 1.1rem; border-radius: 0.75rem; background: #0b1220; border: 1px solid var(--stroke); }
+    .desc h2 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+    .desc p { margin: 0 0 0.75rem; color: var(--muted); }
+    .desc-grid { display: grid; gap: 0.75rem; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 720px) { .desc-grid { grid-template-columns: 1fr; } }
+    .desc-block { border: 1px solid var(--stroke); border-radius: 0.5rem; padding: 0.75rem; }
+    .desc-block h3 { margin: 0 0 0.4rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
+    .desc-block ul { margin: 0; padding-left: 1.1rem; color: var(--text); font-size: 0.88rem; }
+    .desc-block li { margin-bottom: 0.35rem; }
+    .apis { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--stroke); }
+    .apis code { background: var(--panel); padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-size: 0.8rem; color: #7dd3fc; }
+    nav.controls { display: flex; gap: 0.75rem; margin-top: 1rem; }
+    nav.controls button { background: var(--accent); color: #0f172a; border: none; padding: 0.6rem 1.1rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; }
+    nav.controls button.secondary { background: transparent; color: var(--text); border: 1px solid var(--stroke); }
     nav.controls button:disabled { opacity: 0.4; cursor: not-allowed; }
     footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 2rem 1rem; }
   </style>
@@ -137,9 +65,15 @@
 <body>
   <header>
     <h1>Enterprise Commerce Suite — Architecture Walkthrough</h1>
+    <p>
+      This guide explains <strong>what each layer and service does</strong> and <strong>how requests, data, and events move</strong>
+      through the Indian commerce platform — from storefront browse to GST invoice, catalog publish to Solr, and CRM desk to pay-link.
+      Use the tabs and Next/Previous buttons to walk through each business flow step by step.
+    </p>
     <div class="tabs" id="flowTabs"></div>
   </header>
   <main>
+    <div class="flow-intro" id="flowIntro"></div>
     <div class="step-meta">
       <span id="stepLabel">Step 1 of 1</span>
       <span id="flowTitle"></span>
@@ -151,159 +85,327 @@
       <button type="button" id="nextBtn">Next</button>
     </nav>
   </main>
-  <footer>Open docs/architecture-walkthrough.html locally or host on GitHub Pages · MIT · Pawan Gunjkar</footer>
+  <footer>docs/architecture-walkthrough.html · MIT · Pawan Gunjkar · enterprise-commerce-suite</footer>
 
   <script>
     const FLOWS = {
       overview: {
         title: "Platform layers",
+        intro: "ECS is split into five layers. User-facing apps never call microservices directly — everything goes through the API Gateway. Domains own their Postgres schemas and publish Kafka events; search and OMS consume those events asynchronously.",
         steps: [
           {
-            title: "Experience layer",
-            text: "Six React 19 portals (storefront :5173, master admin :5174, catalog :5175, OMS :5176, billing :5177, CRM :5178) call a single API surface.",
-            layers: [
-              { name: "Experience", boxes: [
-                { label: "Storefront", sub: ":5173", cls: "plat" },
-                { label: "Admin consoles", sub: ":5174–5178", cls: "plat" }
-              ]}
-            ]
+            title: "Layer 1 — Experience (what users see)",
+            text: "Six React 19 portals give buyers and operators role-specific UIs. Each portal uses TanStack Query + axios to call the same gateway base URL.",
+            does: [
+              "Storefront (:5173) — faceted search, variant matrix, pincode EDD, BharatQR checkout",
+              "Master Admin (:5174) — GMV KPIs, console switcher, architecture blueprint drawer",
+              "Catalog Studio (:5175) — SKU tree, IMEI ingest, temporal offer preview",
+              "Order Portal (:5176) — WMS kanban, NDR radar, place-order desk",
+              "Billing Portal (:5177) — GST returns, TCS 194O, payment reconciliation",
+              "CRM Portal (:5178) — Customer 360, OTP desk, pay-links, tickets"
+            ],
+            how: [
+              "Browser loads Vite SPA → axios POST/GET to http://localhost:8080/api/v1/...",
+              "JWT bearer from Keycloak realm ecs attached on protected admin routes",
+              "No portal embeds business rules — all tax, stock, and price logic lives in Java services"
+            ],
+            layers: [{ name: "Experience", boxes: [
+              { label: "Storefront", sub: "Buyer UX :5173", cls: "plat" },
+              { label: "Admin consoles", sub: "Ops UX :5174–5178", cls: "plat" }
+            ]}]
           },
           {
-            title: "Edge & security",
-            text: "Spring Cloud Gateway :8080 terminates TLS/CORS, JWT (Keycloak realm ecs), Redis token-bucket rate limits, and Resilience4j circuit breakers on every downstream hop.",
-            layers: [
-              { name: "Edge", boxes: [
-                { label: "API Gateway", sub: ":8080", cls: "plat" },
-                { label: "Keycloak", sub: ":8081", cls: "plat" }
-              ]}
-            ]
+            title: "Layer 2 — Edge & security (front door)",
+            text: "Spring Cloud Gateway is the only public HTTP entry for APIs. It routes by path prefix, enforces rate limits, and wraps downstream calls with circuit breakers.",
+            does: [
+              "Route /api/v1/products → product-service:8101, /orders → order-orchestrator:8203, etc.",
+              "Redis token-bucket: 40 req/s replenish, burst 80 per client IP",
+              "Resilience4j circuit breaker — failed downstream returns gateway fallback",
+              "Keycloak (:8081) issues OAuth 2.1 JWT for realm ecs"
+            ],
+            how: [
+              "Request hits :8080 → Gateway matches Path predicate → forwards to ECS_URI_* upstream",
+              "OAuth resource server validates JWT issuer before admin mutations",
+              "WebSocket /ws/payments/** proxied to payment-gateway for live UPI status"
+            ],
+            apis: ["GET /actuator/health", "All /api/v1/** routed per application.yml"],
+            layers: [{ name: "Edge", boxes: [
+              { label: "API Gateway", sub: "Route + limit :8080", cls: "plat" },
+              { label: "Keycloak", sub: "JWT issuer :8081", cls: "plat" }
+            ]}]
           },
           {
-            title: "Domain services",
-            text: "Four autonomous Maven parents — MEC, OMS, Billing, CRM — each with dedicated Postgres schemas. Contracts cross only via shared-libraries SPI/events.",
-            layers: [
-              { name: "Domains", boxes: [
-                { label: "MEC", sub: "8101–8111", cls: "mec" },
-                { label: "OMS", sub: "8201–8210", cls: "oms" },
-                { label: "Billing", sub: "8301–8311", cls: "bill" },
-                { label: "CRM", sub: "8401–8408", cls: "crm" }
-              ]}
-            ]
+            title: "Layer 3 — Domain microservices (business logic)",
+            text: "Four Maven parents (MEC, OMS, Billing, CRM) contain 50+ Spring Boot 3.3 apps. They share nothing except platform-infrastructure/shared-libraries.",
+            does: [
+              "MEC (8101–8111) — SKU lifecycle, variants, IMEI, CPQ, offers, B2B tiers, DAM",
+              "OMS (8201–8210) — cart, checkout intent, order saga, ATP, WMS, carriers, NDR, ONDC",
+              "Billing (8301–8311) — GST slabs, TCS 194O, BharatQR, invoices, ledger, dunning",
+              "CRM (8401–8408) — OTP identity, loyalty, DPDP, tickets, assisted pay-links"
+            ],
+            how: [
+              "Each JAR has own Flyway schema on Postgres (ecs_mec, ecs_oms, ecs_billing, ecs_crm)",
+              "Cross-domain calls use RestClient via common-core DownstreamClient — never compile-time imports",
+              "order-orchestrator orchestrates checkout by calling ATP, payment, WMS, invoice HTTP APIs"
+            ],
+            layers: [{ name: "Domains", boxes: [
+              { label: "MEC", sub: "Catalog truth", cls: "mec" },
+              { label: "OMS", sub: "Order truth", cls: "oms" },
+              { label: "Billing", sub: "Money truth", cls: "bill" },
+              { label: "CRM", sub: "Customer truth", cls: "crm" }
+            ]}]
           },
           {
-            title: "Data & cache",
-            text: "PostgreSQL 16 JSONB per domain, Redis 7 for carts/prices/rate limits, MinIO for DAM assets.",
-            layers: [
-              { name: "Data", boxes: [
-                { label: "PostgreSQL", sub: ":5432", cls: "plat" },
-                { label: "Redis", sub: ":6379", cls: "plat" },
-                { label: "MinIO", sub: ":9000", cls: "plat" }
-              ]}
-            ]
+            title: "Layer 4 — Data & cache (where state lives)",
+            text: "Authoritative business state is relational. Ephemeral/session state uses Redis. Media binaries go to MinIO.",
+            does: [
+              "PostgreSQL 16 — orders, invoices, products, customers, saga state (JSONB columns where flexible)",
+              "Redis 7 — shopping carts, dynamic price cache keys, gateway rate limit counters",
+              "MinIO — DAM images and bulk import files",
+              "Caffeine in-process cache on pincode, GST slab, product hot reads"
+            ],
+            how: [
+              "cart-service writes cart lines to Redis with TTL; checkout reads same cartId",
+              "checkout_saga + commerce_order persisted in OMS Postgres before saga steps run",
+              "Flyway migrations version each service schema independently"
+            ],
+            layers: [{ name: "Data", boxes: [
+              { label: "PostgreSQL", sub: "Source of truth", cls: "plat" },
+              { label: "Redis", sub: "Carts + limits", cls: "plat" },
+              { label: "MinIO", sub: "Media assets", cls: "plat" }
+            ]}]
           },
           {
-            title: "Events & search",
-            text: "Kafka KRaft publishes catalog/offer/order CloudEvents. search-solr-indexer consumes and feeds Solr 9 faceted product index.",
-            layers: [
-              { name: "Events", boxes: [
-                { label: "Kafka", sub: ":9092", cls: "plat" },
-                { label: "Solr indexer", sub: ":8090", cls: "mec" },
-                { label: "Solr Cloud", sub: ":8983", cls: "mec" }
-              ]}
-            ]
+            title: "Layer 5 — Events & search (async propagation)",
+            text: "When catalog or offers change, domains emit Kafka CloudEvents. Indexers and OMS consumers catch up without blocking the write API.",
+            does: [
+              "Kafka KRaft (:9092) — catalog.offer.activated, order events, audit trails",
+              "search-solr-indexer (:8090) — consumes catalog events, pushes Solr documents",
+              "Solr 9 (:8983) — faceted search (brand, RAM, color, price range)",
+              "catalog-consumer-service — OMS-side cache of live SKUs for cart validation"
+            ],
+            how: [
+              "offer-promotion-service POST /offers → writes DB → publishes OfferActivatedEvent to Kafka",
+              "Indexer listens → updates Solr → storefront GET /search/products returns facets",
+              "If Kafka lag, search may be seconds behind activate API — eventual consistency by design"
+            ],
+            layers: [{ name: "Events", boxes: [
+              { label: "Kafka", sub: "CloudEvents", cls: "plat" },
+              { label: "Solr indexer", sub: ":8090", cls: "mec" },
+              { label: "Solr Cloud", sub: "Facets :8983", cls: "mec" }
+            ]}]
           }
         ]
       },
       checkout: {
         title: "Delhi UPI checkout saga",
+        intro: "Example: shopper in Delhi (110001) buys SKU-PHONE-8-128-BLACK shipped from Haryana warehouse. The storefront prepares price/tax, then order-orchestrator runs a compensating saga: ATP lock → payment → WMS → invoice. Failure at any step rolls back prior steps.",
         steps: [
-          { title: "Serviceability", text: "Buyer enters pincode 110001. pincode-master-service returns EDD, ODA flag, origin HR → dest DL.", boxes: [
-            { label: "Storefront", cls: "plat" }, { label: "Gateway", cls: "plat" }, { label: "Pincode", cls: "oms" }
-          ]},
-          { title: "Cart & price", text: "cart-service persists lines in Redis. dynamic-price-engine applies offers + loyalty.", boxes: [
-            { label: "Cart", cls: "oms" }, { label: "Price engine", cls: "oms" }
-          ]},
-          { title: "GST", text: "gst-tax-engine computes IGST 18% on HSN 8517 for inter-state HR→DL shipment.", boxes: [
-            { label: "GST engine", cls: "bill" }
-          ]},
-          { title: "Place order", text: "order-orchestrator persists commerce_order + checkout_saga, then runs SagaOrchestrator steps.", boxes: [
-            { label: "Order orchestrator", cls: "oms" }, { label: "Postgres OMS", cls: "plat" }
-          ]},
-          { title: "ATP lock", text: "atp-inventory-service locks SKU-PHONE-8-128-BLACK at warehouse NDC-HR. Failure aborts saga.", boxes: [
-            { label: "ATP", cls: "oms" }, { label: "Redis lock", cls: "plat" }
-          ]},
-          { title: "Payment", text: "payment-gateway-service mints BharatQR; simulate_success captures UPI in lab.", boxes: [
-            { label: "BharatQR", cls: "bill" }, { label: "WebSocket status", cls: "bill" }
-          ]},
-          { title: "Fulfillment", text: "wms-fulfillment-service creates pick wave; invoice-service posts GST invoice on capture.", boxes: [
-            { label: "WMS wave", cls: "oms" }, { label: "Invoice + GL", cls: "bill" }
-          ]},
-          { title: "Compensation", text: "On failure: unlock ATP → void payment → cancel wave. Saga state stored in checkout_saga table.", boxes: [
-            { label: "Compensate", cls: "oms" }
-          ]}
+          {
+            title: "Step 1 — Pincode serviceability",
+            text: "Before showing EDD, the storefront asks whether the pincode is serviceable and whether the lane is inter-state (IGST) or intra-state (CGST+SGST).",
+            does: ["Returns estimated delivery date (EDD)", "Flags ODA (out of delivery area) if unsupported", "Compares origin warehouse state (HR) vs destination (DL)"],
+            how: ["Storefront → Gateway → pincode-master-service", "Response drives GST engine originState/destState and checkout UX"],
+            apis: ["GET /api/v1/pincodes/serviceability?pincode=110001&origin=122001"],
+            boxes: [{ label: "Storefront", cls: "plat" }, { label: "Gateway", cls: "plat" }, { label: "Pincode master", cls: "oms" }]
+          },
+          {
+            title: "Step 2 — Cart & dynamic pricing",
+            text: "Lines are stored in Redis so refresh and multi-tab carts stay consistent. Price engine applies offer discounts and loyalty rupee-off.",
+            does: ["add_cart_item stores sku, qty, unitPriceInr under cartId", "calculate_price merges offerDiscount + loyaltyDiscount on basePrice", "Cart survives until TTL expiry or checkout completion"],
+            how: ["cart-service reads/writes Redis hash keyed by cartId", "dynamic-price-engine is stateless — returns computed INR for display and order amount"],
+            apis: ["POST /api/v1/carts/items", "POST /api/v1/prices/calculate"],
+            boxes: [{ label: "Cart service", cls: "oms" }, { label: "Price engine", cls: "oms" }, { label: "Redis", cls: "plat" }]
+          },
+          {
+            title: "Step 3 — GST computation (India-specific)",
+            text: "gst-tax-engine applies HSN 8517 slab 18%. Inter-state HR→DL yields IGST; same-state would split CGST+SGST.",
+            does: ["Validates HSN and taxable amount", "Returns taxType (IGST vs CGST/SGST), component amounts", "Feeds invoice-service later for compliant GST invoice JSON"],
+            how: ["Storefront sends taxable after discounts, originState HR, destState DL", "Tax result shown on checkout summary before place order"],
+            apis: ["POST /api/v1/gst/compute"],
+            boxes: [{ label: "GST engine", cls: "bill" }]
+          },
+          {
+            title: "Step 4 — Place order & persist saga",
+            text: "order-orchestrator creates commerce_order row + checkout_saga state machine, then invokes SagaOrchestrator in-process.",
+            does: ["Generates orderId UUID and human-readable order ref", "Persists lines, pincode, paymentMode UPI, amount INR", "Records saga step timestamps for ops desk audit"],
+            how: ["POST /orders/place → JDBC insert → saga.run(context)", "Saga state enum: CART_VALIDATED → ATP_LOCKED → PAYMENT_AUTHORIZED → WAVE_CREATED → COMPLETED"],
+            apis: ["POST /api/v1/orders/place"],
+            boxes: [{ label: "Order orchestrator", cls: "oms" }, { label: "Postgres OMS", cls: "plat" }]
+          },
+          {
+            title: "Step 5 — ATP lock (inventory reservation)",
+            text: "atp-inventory-service decrements available-to-promise at warehouse NDC-HR. Short stock aborts the whole saga.",
+            does: ["lock_stock reserves qty for sku at warehouse", "Prevents oversell while payment pending", "Returns remaining ATP for ops dashboards"],
+            how: ["Orchestrator RestClient POST to atp URL configured in ecs.downstream.atp-url", "Failure throws → saga compensates nothing yet → order marked FAILED"],
+            apis: ["POST /api/v1/inventory/lock"],
+            boxes: [{ label: "ATP service", cls: "oms" }, { label: "Inventory DB", cls: "plat" }]
+          },
+          {
+            title: "Step 6 — UPI payment & BharatQR",
+            text: "payment-gateway-service creates Dynamic BharatQR (upi://pay?...) and exposes WebSocket status on /ws/payments/{txnId}.",
+            does: ["Mint QR PNG Base64 + GPay/PhonePe intent URLs", "Lab: simulate-success marks txn CAPTURED", "Stores txnRef linked to orderId"],
+            how: ["Orchestrator authorizes UPI before WMS wave", "Storefront polls/ws for PENDING → CAPTURED", "On payment failure → compensate unlock ATP"],
+            apis: ["POST /api/v1/payments/upi/bharat-qr", "POST /api/v1/payments/{txnId}/simulate-success"],
+            boxes: [{ label: "Payment gateway", cls: "bill" }, { label: "WebSocket status", cls: "bill" }]
+          },
+          {
+            title: "Step 7 — WMS wave & GST invoice",
+            text: "After payment authorize, wms-fulfillment-service creates pick wave. On capture, invoice-service posts GST-compliant invoice.",
+            does: ["create_wave lists sku, bin, qty for warehouse pickers", "invoice-service generates invoice with IGST line items", "general-ledger-service can post double-entry (when enabled)"],
+            how: ["Saga step warehouse-route → capture-on-dispatch", "Order status becomes COMPLETED in commerce_order"],
+            apis: ["POST /api/v1/wms/waves", "POST /api/v1/invoices"],
+            boxes: [{ label: "WMS fulfillment", cls: "oms" }, { label: "Invoice service", cls: "bill" }]
+          },
+          {
+            title: "Step 8 — Compensation (failure path)",
+            text: "If any saga step throws, SagaOrchestrator walks executed steps in reverse and calls compensate handlers.",
+            does: ["unlock ATP reservation", "void authorized payment", "cancel WMS wave if created", "Persist FAILED state + error message on checkout_saga"],
+            how: ["Reverse loop: capture → cancel wave → void payment → unlock ATP", "Shopper sees error JSON from DomainException — never silent rollback"],
+            boxes: [{ label: "Saga compensate", cls: "oms" }, { label: "checkout_saga row", cls: "plat" }]
+          }
         ]
       },
       catalog: {
         title: "MEC catalog publish",
+        intro: "Merchandising creates a SKU in MEC, activates it, attaches IMEI for regulated handsets, publishes offers to Kafka, and eventually appears in Solr search and OMS cart validation — without manual sync scripts.",
         steps: [
-          { title: "Author SKU", text: "product-service creates draft with HSN, category path, list price INR.", boxes: [
-            { label: "Catalog studio", cls: "plat" }, { label: "product-service", cls: "mec" }
-          ]},
-          { title: "Activate", text: "activate_product flips SKU live; validates schema via dynamic-schema-engine when needed.", boxes: [
-            { label: "Activate API", cls: "mec" }
-          ]},
-          { title: "IMEI ingest", text: "serial-imei-tracking-service validates 15-digit Luhn for handset SKUs.", boxes: [
-            { label: "IMEI service", cls: "mec" }
-          ]},
-          { title: "Offer / CPQ", text: "offer-promotion-service emits OfferActivatedEvent; cpq-rule-engine evaluates bundle rules.", boxes: [
-            { label: "Offers", cls: "mec" }, { label: "CPQ", cls: "mec" }, { label: "Kafka", cls: "plat" }
-          ]},
-          { title: "Search index", text: "search-solr-indexer consumes events and updates Solr facets (brand, RAM, price).", boxes: [
-            { label: "Indexer", cls: "plat" }, { label: "Solr", cls: "mec" }
-          ]},
-          { title: "OMS consumer", text: "catalog-consumer-service hydrates OMS catalog cache for cart/checkout.", boxes: [
-            { label: "OMS consumer", cls: "oms" }
-          ]}
+          {
+            title: "Step 1 — Create draft SKU",
+            text: "product-service stores draft product with HSN code (for GST), category path, brand, and list price INR.",
+            does: ["Validates sku uniqueness", "Stores JSONB attributes for variant matrix linkage", "Returns product id used by activate API"],
+            how: ["Catalog Studio form → POST /products → Postgres ecs_mec schema", "Draft SKU not visible in storefront search until activated"],
+            apis: ["POST /api/v1/products"],
+            boxes: [{ label: "Catalog Studio", cls: "plat" }, { label: "product-service", cls: "mec" }, { label: "Postgres MEC", cls: "plat" }]
+          },
+          {
+            title: "Step 2 — Activate to live catalog",
+            text: "Activation flips lifecycle flag so OMS and search pipelines treat SKU as sellable.",
+            does: ["PUT activate sets status LIVE", "May run dynamic-schema-engine validation on extended attributes", "Triggers downstream sync expectations"],
+            how: ["Operator clicks Activate → gateway → product-service", "catalog-sync-publisher / Kafka events notify indexers"],
+            apis: ["PUT /api/v1/products/{id}/activate"],
+            boxes: [{ label: "Activate API", cls: "mec" }, { label: "Schema validate", cls: "mec" }]
+          },
+          {
+            title: "Step 3 — IMEI serial tracking",
+            text: "For mobile SKUs, serial-imei-tracking-service ingests IMEI1/IMEI2 with 15-digit Luhn validation (Indian handset compliance).",
+            does: ["Reject invalid IMEI checksum", "Bind serial to sku for warranty and GST e-way on high-value moves", "Supports BIS/traceability audits"],
+            how: ["Catalog Studio or bulk import → POST /imei/ingest", "Stored in MEC Postgres, referenced during fulfillment scan"],
+            apis: ["POST /api/v1/imei/ingest"],
+            boxes: [{ label: "IMEI service", cls: "mec" }]
+          },
+          {
+            title: "Step 4 — Offers & CPQ rules",
+            text: "Merchandising attaches festival offers. cpq-rule-engine evaluates bundle/tier rules before offer goes live.",
+            does: ["create_offer publishes OfferActivatedEvent to Kafka", "evaluate_cpq validates discount against margin floors", "temporal-activation-service previews catalog at future asOf timestamp"],
+            how: ["POST /offers → Kafka topic → async consumers", "Offer does not block HTTP — eventual Solr/price updates"],
+            apis: ["POST /api/v1/offers", "POST /api/v1/catalog/cpq/evaluate"],
+            boxes: [{ label: "Offer promotion", cls: "mec" }, { label: "CPQ engine", cls: "mec" }, { label: "Kafka", cls: "plat" }]
+          },
+          {
+            title: "Step 5 — Solr faceted index",
+            text: "search-solr-indexer projects catalog documents into Solr for storefront faceted browse.",
+            does: ["Maps brand, RAM, color, price facets", "Powers autocomplete endpoint", "Decoupled from product-service read load"],
+            how: ["Kafka consumer in indexer → Solr soft commit", "Storefront GET /search/products never hits Postgres directly"],
+            apis: ["GET /api/v1/search/products?q=Nova+X"],
+            boxes: [{ label: "Solr indexer", cls: "plat" }, { label: "Solr Cloud", cls: "mec" }]
+          },
+          {
+            title: "Step 6 — OMS catalog consumer",
+            text: "catalog-consumer-service maintains OMS-side view so cart and checkout validate sku/qty against live catalog.",
+            does: ["Hydrates local cache/table of active SKUs", "Prevents checkout on deactivated products", "Receives same Kafka catalog events"],
+            how: ["Event → consumer → OMS cache update", "cart-service add_item validates sku exists in consumer view"],
+            boxes: [{ label: "Catalog consumer", cls: "oms" }, { label: "Cart validation", cls: "oms" }]
+          }
         ]
       },
       crm: {
         title: "CRM 360 assisted desk",
+        intro: "Store associates verify shopper identity via mobile OTP, enrich a Customer 360 dossier (KYC, loyalty, B2B tree), record DPDP consent, then mint assisted pay-links or tickets — operational CRM, not a FAQ bot.",
         steps: [
-          { title: "OTP identity", text: "customer-360-service otp_start / otp_verify (lab OTP 123456) for Indian mobile.", boxes: [
-            { label: "CRM desk", cls: "plat" }, { label: "Customer 360", cls: "crm" }
-          ]},
-          { title: "KYC profile", text: "upsert_profile stores PAN/GSTIN/name; get_profile returns merged dossier.", boxes: [
-            { label: "Profile API", cls: "crm" }
-          ]},
-          { title: "DPDP consent", text: "dpdp-compliance-service records purpose-limited consent (ORDER, MARKETING, ASSISTED).", boxes: [
-            { label: "DPDP", cls: "crm" }
-          ]},
-          { title: "Loyalty & hierarchy", text: "loyalty-rewards-service applies festival multiplier; account-hierarchy-service loads B2B tree.", boxes: [
-            { label: "Loyalty", cls: "crm" }, { label: "Account tree", cls: "crm" }
-          ]},
-          { title: "Assisted pay-link", text: "assisted-sales-service mints WhatsApp pay-link after enrichment.", boxes: [
-            { label: "Pay-link", cls: "crm" }
-          ]},
-          { title: "Recovery", text: "support-ticket-service + cart-abandonment-service for desk follow-up.", boxes: [
-            { label: "Tickets", cls: "crm" }, { label: "Abandonment", cls: "crm" }
-          ]}
+          {
+            title: "Step 1 — OTP identity",
+            text: "Indian mobile number (10 digits, leading 6–9) is the customer identifier for retail and assisted flows.",
+            does: ["otp_start sends OTP (lab stores 123456)", "otp_verify marks kycStatus VERIFIED", "Rate-limit sensitive — gateway + service validation"],
+            how: ["CRM portal → customer-360-service POST /otp/start and /otp/verify", "Verified mobile unlocks profile upsert and consent"],
+            apis: ["POST /api/v1/customers/otp/start", "POST /api/v1/customers/otp/verify"],
+            boxes: [{ label: "CRM desk", cls: "plat" }, { label: "Customer 360", cls: "crm" }]
+          },
+          {
+            title: "Step 2 — KYC profile dossier",
+            text: "Associates capture PAN, GSTIN (B2B), and legal name. get_profile returns merged view without leaking OTP secret.",
+            does: ["upsert_profile merges pan, gstin, name into store", "get_profile returns 404 if unknown mobile", "Supports assisted desk and self-service account page"],
+            how: ["PUT /customers/{mobile} → in-memory/Postgres merge", "Customer360Agent in enterprise-commerce-agents calls get_profile first for enrichment"],
+            apis: ["PUT /api/v1/customers/{mobile}", "GET /api/v1/customers/{mobile}"],
+            boxes: [{ label: "Profile API", cls: "crm" }]
+          },
+          {
+            title: "Step 3 — DPDP consent (2023 Act)",
+            text: "dpdp-compliance-service records purpose-bound consent before marketing or assisted checkout uses personal data.",
+            does: ["Records purpose: ORDER_FULFILLMENT, MARKETING, ASSISTED_CHECKOUT", "Stores granted flag + customerId + timestamp", "Supports anonymization endpoints for erasure requests"],
+            how: ["Desk records consent after identity verified", "Downstream campaigns check consent record before SMS/WhatsApp"],
+            apis: ["POST /api/v1/dpdp/consent"],
+            boxes: [{ label: "DPDP compliance", cls: "crm" }]
+          },
+          {
+            title: "Step 4 — Loyalty & B2B hierarchy",
+            text: "loyalty-rewards-service returns points/tier with optional festival multiplier. account-hierarchy-service loads dealer/distributor tree for B2B quotes.",
+            does: ["Festival multiplier e.g. 1.5× on redeemable points", "Account tree for ACC-DEALER-* tier pricing", "Feeds assisted-sales discount decisions"],
+            how: ["Parallel GETs after profile loaded", "B2B quote flow in MEC reads same account tree"],
+            apis: ["GET /api/v1/loyalty/{customerId}", "GET /api/v1/accounts/tree"],
+            boxes: [{ label: "Loyalty", cls: "crm" }, { label: "Account tree", cls: "crm" }]
+          },
+          {
+            title: "Step 5 — Assisted pay-link",
+            text: "assisted-sales-service mints WhatsApp-ready URL so shopper completes payment on own device while associate watches order desk.",
+            does: ["Returns paylink URL and channel WHATSAPP", "Links mobile + amount + sku context", "Pairs with OMS checkout when shopper pays"],
+            how: ["Enrichment: profile → loyalty → consent → create_paylink", "Scenario crm-assisted-sales-paylink in enterprise-commerce-agents"],
+            apis: ["POST /api/v1/assisted-sales/paylinks"],
+            boxes: [{ label: "Assisted sales", cls: "crm" }, { label: "Shopper device", cls: "plat" }]
+          },
+          {
+            title: "Step 6 — Tickets & cart recovery",
+            text: "support-ticket-service opens ASSISTED channel tickets. cart-abandonment-service marks carts for callback campaigns.",
+            does: ["Ticket subject + customerId for desk queue", "mark_abandoned links cartId for recovery", "Closes loop on failed assisted checkout"],
+            how: ["Optional final steps when shopper drops off", "CRM portal shows open tickets alongside 360 dossier"],
+            apis: ["POST /api/v1/tickets", "POST /api/v1/carts/abandonment"],
+            boxes: [{ label: "Support ticket", cls: "crm" }, { label: "Cart abandonment", cls: "crm" }]
+          }
         ]
       },
       agents: {
         title: "MCP + LangGraph operators",
+        intro: "The suite exposes REST APIs. enterprise-commerce-mcps wraps each app as FastMCP tools. enterprise-commerce-agents runs LangGraph ReAct operators with enrichment playbooks and YAML scenarios — live operators, not documentation chatbots.",
         steps: [
-          { title: "Suite APIs", text: "Each Spring Boot app exposes REST under /api/v1/* via gateway :8080.", boxes: [
-            { label: "ECS Suite", cls: "plat" }
-          ]},
-          { title: "MCP layer", text: "enterprise-commerce-mcps — 54 FastMCP stdio servers wrap HTTP with typed tools.", boxes: [
-            { label: "FastMCP", cls: "plat" }, { label: "Cursor / IDE", cls: "plat" }
-          ]},
-          { title: "Agent layer", text: "enterprise-commerce-agents — LangGraph ReAct operators with enrichment playbooks.", boxes: [
-            { label: "Journey agents", cls: "crm" }, { label: "Specialists", cls: "oms" }
-          ]},
-          { title: "Scenario runner", text: "YAML playbooks (checkout-delhi-upi, mec-catalog-lifecycle, crm-assisted-sales) call MCP in order.", boxes: [
-            { label: "Scenarios", cls: "plat" }
-          ]}
+          {
+            title: "Step 1 — Suite as source of truth",
+            text: "Every MCP tool ultimately HTTP-calls a real microservice through the gateway or direct service URL.",
+            does: ["50+ Spring Boot apps expose OpenAPI-ish REST", "Gateway :8080 in dev; ECS_SERVICE_URL override in MCP env", "Lab mode: ECS_SECURITY_ENABLED=false for local demos"],
+            how: ["MCP never mocks business outcomes — errors bubble from real DomainException JSON", "Same APIs power React portals and agents"],
+            boxes: [{ label: "ECS Suite REST", cls: "plat" }]
+          },
+          {
+            title: "Step 2 — MCP tool layer (54 servers)",
+            text: "enterprise-commerce-mcps generates FastMCP stdio servers — one per suite application — with typed tool parameters.",
+            does: ["Example: customer-360-service.get_profile, order-orchestrator.place_order", "Cursor MCP config in cursor-mcp.example.json", "M8ven listing badge in MCP README"],
+            how: ["IDE launches ecs-mcp-product-service subprocess", "Tool call → HTTP → gateway → microservice → JSON back to agent"],
+            boxes: [{ label: "FastMCP stdio", cls: "plat" }, { label: "HTTP client", cls: "plat" }]
+          },
+          {
+            title: "Step 3 — LangGraph journey agents",
+            text: "enterprise-commerce-agents binds MCP tools to CommerceAgent classes with enrichment playbooks in system prompts.",
+            does: ["Journey: checkout, crm, fulfillment, mec-catalog", "Specialists: Customer360Agent, CheckoutSagaAgent, B2bQuoteAgent", "enrichment.py defines ordered multi-MCP playbooks"],
+            how: ["User prompt routed to agent → ReAct loop calls tools in business order", "Instructions say: pass orderId, cartId, mobile between steps"],
+            boxes: [{ label: "LangGraph ReAct", cls: "crm" }, { label: "87+ specialists", cls: "oms" }]
+          },
+          {
+            title: "Step 4 — YAML scenario runner",
+            text: "Deterministic playbooks in scenarios/*.yaml execute MCP steps with $.jsonpath bindings — used for demos and CI.",
+            does: ["checkout-delhi-upi: 11 steps through cart, GST, QR, payment", "mec-catalog-lifecycle, crm-assisted-sales-paylink, oms-order-to-fulfillment", "run_scenario in ecs_agents/scenarios.py"],
+            how: ["hub.call qualified tool → ctx stores result → next step resolves $.order.data.orderId", "Fails fast on {error} payload from MCP"],
+            apis: ["uv run ecs-agents scenario run checkout-delhi-upi"],
+            boxes: [{ label: "YAML scenarios", cls: "plat" }, { label: "McpHub", cls: "plat" }]
+          }
         ]
       }
     };
@@ -314,6 +416,7 @@
     const tabsEl = document.getElementById("flowTabs");
     const canvasEl = document.getElementById("canvas");
     const descEl = document.getElementById("description");
+    const flowIntroEl = document.getElementById("flowIntro");
     const stepLabel = document.getElementById("stepLabel");
     const flowTitle = document.getElementById("flowTitle");
     const prevBtn = document.getElementById("prevBtn");
@@ -348,14 +451,29 @@
       ).join("")}</div>`;
     }
 
+    function listHtml(title, items) {
+      if (!items || !items.length) return "";
+      return `<div class="desc-block"><h3>${title}</h3><ul>${items.map(i => `<li>${i}</li>`).join("")}</ul></div>`;
+    }
+
     function render() {
       const flow = FLOWS[flowKey];
       const step = flow.steps[stepIndex];
       renderTabs();
+      flowIntroEl.innerHTML = `<strong>About this flow:</strong> ${flow.intro}`;
       flowTitle.textContent = flow.title;
       stepLabel.textContent = `Step ${stepIndex + 1} of ${flow.steps.length}`;
       renderCanvas(step);
-      descEl.innerHTML = `<h2>${step.title}</h2><p>${step.text}</p>`;
+      const apis = step.apis ? `<div class="apis"><strong>Key APIs:</strong> ${step.apis.map(a => `<code>${a}</code>`).join(" · ")}</div>` : "";
+      descEl.innerHTML = `
+        <h2>${step.title}</h2>
+        <p>${step.text}</p>
+        <div class="desc-grid">
+          ${listHtml("What it does", step.does)}
+          ${listHtml("How it flows", step.how)}
+        </div>
+        ${apis}
+      `;
       prevBtn.disabled = stepIndex === 0;
       nextBtn.disabled = stepIndex === flow.steps.length - 1;
       nextBtn.textContent = stepIndex === flow.steps.length - 1 ? "Done" : "Next";

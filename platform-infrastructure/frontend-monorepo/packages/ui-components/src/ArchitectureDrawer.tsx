@@ -1,48 +1,58 @@
 import { useMemo, useState } from "react";
 
 type FlowBox = { label: string; sub?: string; tone: "plat" | "mec" | "oms" | "bill" | "crm" };
-type FlowStep = { title: string; text: string; boxes: FlowBox[] };
+type FlowStep = { title: string; text: string; does?: string[]; how?: string[]; boxes: FlowBox[] };
 
-const FLOWS: Record<string, { title: string; steps: FlowStep[] }> = {
+const FLOWS: Record<string, { title: string; intro: string; steps: FlowStep[] }> = {
   overview: {
     title: "Platform layers",
+    intro: "Six React portals → API Gateway → 50+ Java services → Postgres/Redis/Kafka/Solr. Domains never import each other directly.",
     steps: [
       {
-        title: "Experience → Gateway → Domains",
-        text: "Storefront and admin consoles hit API Gateway :8080. JWT from Keycloak realm ecs.",
+        title: "Experience → Gateway",
+        text: "Buyers use storefront :5173; operators use admin consoles :5174–5178. All HTTP goes to gateway :8080 — never to service ports directly from browsers.",
+        does: ["Storefront: search, EDD, BharatQR checkout", "Admin: catalog, OMS, billing, CRM desks"],
+        how: ["axios + TanStack Query → /api/v1/*", "JWT from Keycloak realm ecs on protected routes"],
         boxes: [
           { label: "React portals", sub: ":5173–5178", tone: "plat" },
-          { label: "API Gateway", sub: ":8080", tone: "plat" },
-          { label: "MEC / OMS / Bill / CRM", tone: "mec" }
+          { label: "API Gateway", sub: ":8080", tone: "plat" }
         ]
       },
       {
-        title: "Data plane",
-        text: "Postgres per domain, Redis carts/prices, Kafka events, Solr search index.",
+        title: "Domains + data plane",
+        text: "MEC owns SKUs, OMS owns orders/saga, Billing owns GST/UPI/invoices, CRM owns identity/consent. Postgres is source of truth; Redis holds carts.",
+        does: ["MEC 8101–8111 · OMS 8201–8210 · Billing 8301–8311 · CRM 8401–8408", "Kafka → Solr indexer + OMS catalog consumer"],
+        how: ["Flyway schema per service", "CloudEvents on offer/catalog changes"],
         boxes: [
-          { label: "PostgreSQL", tone: "plat" },
-          { label: "Redis", tone: "plat" },
-          { label: "Kafka", tone: "plat" },
-          { label: "Solr", tone: "mec" }
+          { label: "MEC", tone: "mec" },
+          { label: "OMS", tone: "oms" },
+          { label: "Billing", tone: "bill" },
+          { label: "CRM", tone: "crm" },
+          { label: "Postgres + Kafka", tone: "plat" }
         ]
       }
     ]
   },
   checkout: {
     title: "Checkout saga",
+    intro: "Delhi shopper, inter-state IGST, UPI BharatQR. order-orchestrator runs compensating saga: ATP → pay → WMS → invoice.",
     steps: [
       {
-        title: "Pre-checkout",
-        text: "Pincode EDD → cart → dynamic price → IGST on HSN 8517.",
+        title: "Pre-checkout enrichment",
+        text: "Pincode serviceability sets EDD and tax lane (HR→DL = IGST). Cart in Redis, price engine applies discounts, GST computes on HSN 8517.",
+        does: ["GET /pincodes/serviceability", "POST /carts/items, /prices/calculate, /gst/compute"],
+        how: ["Storefront orchestrates reads before place_order", "taxable amount = price after loyalty"],
         boxes: [
           { label: "Pincode", tone: "oms" },
-          { label: "Cart", tone: "oms" },
-          { label: "GST", tone: "bill" }
+          { label: "Cart + Price", tone: "oms" },
+          { label: "GST IGST", tone: "bill" }
         ]
       },
       {
-        title: "Saga steps",
-        text: "order-orchestrator: ATP lock → UPI authorize → WMS wave → capture + invoice. Compensate on failure.",
+        title: "Saga execution",
+        text: "POST /orders/place persists commerce_order + checkout_saga, then SagaOrchestrator calls ATP lock, payment authorize, WMS wave, capture + invoice.",
+        does: ["lock_stock at NDC-HR", "BharatQR + simulate-success in lab", "Compensate unlock/void/cancel on failure"],
+        how: ["In-process saga loop with reverse compensation", "FAILED status + error on checkout_saga row"],
         boxes: [
           { label: "Order saga", tone: "oms" },
           { label: "ATP lock", tone: "oms" },
@@ -54,27 +64,51 @@ const FLOWS: Record<string, { title: string; steps: FlowStep[] }> = {
   },
   catalog: {
     title: "Catalog publish",
+    intro: "SKU create → activate → IMEI → Kafka offer → Solr index → OMS consumer. Search lags activate by seconds (eventual consistency).",
     steps: [
       {
         title: "SKU lifecycle",
-        text: "Create → activate → IMEI ingest → offer event → Solr index → OMS consumer.",
+        text: "product-service stores draft with HSN; activate flips LIVE; IMEI service validates Luhn for handsets.",
+        does: ["POST /products, PUT /products/{id}/activate", "POST /imei/ingest"],
+        how: ["Catalog Studio → gateway → MEC Postgres", "Draft invisible in Solr until indexed"],
         boxes: [
           { label: "product-service", tone: "mec" },
-          { label: "IMEI", tone: "mec" },
+          { label: "IMEI", tone: "mec" }
+        ]
+      },
+      {
+        title: "Async propagation",
+        text: "Offers publish Kafka CloudEvents; search-solr-indexer updates facets; catalog-consumer hydrates OMS cart validation.",
+        does: ["POST /offers → Kafka", "GET /search/products for storefront"],
+        how: ["Indexer consumer → Solr soft commit", "cart-service validates sku against consumer cache"],
+        boxes: [
           { label: "Kafka offer", tone: "plat" },
-          { label: "Solr", tone: "mec" }
+          { label: "Solr", tone: "mec" },
+          { label: "OMS consumer", tone: "oms" }
         ]
       }
     ]
   },
   crm: {
     title: "CRM 360",
+    intro: "Assisted desk: OTP identity → KYC dossier → DPDP consent → loyalty → WhatsApp pay-link or ticket.",
     steps: [
       {
-        title: "Assisted desk",
-        text: "OTP → profile → DPDP consent → loyalty → pay-link / ticket.",
+        title: "Identity + KYC",
+        text: "Mobile is customerId. OTP verify (lab 123456), then upsert/get profile with PAN/GSTIN/name.",
+        does: ["POST /customers/otp/start|verify", "PUT + GET /customers/{mobile}"],
+        how: ["CRM portal :5178 → customer-360-service :8401", "Agents call get_profile for enrichment"],
         boxes: [
           { label: "Customer 360", tone: "crm" },
+          { label: "Profile store", tone: "crm" }
+        ]
+      },
+      {
+        title: "Consent + assisted actions",
+        text: "Record DPDP purpose, check loyalty tier, mint pay-link or open support ticket; mark cart abandoned if needed.",
+        does: ["record_consent, get_loyalty, create_paylink, create_ticket"],
+        how: ["Enrichment before pay-link (crm-assisted-sales playbook)", "Scenario crm-assisted-sales-paylink in agents repo"],
+        boxes: [
           { label: "DPDP", tone: "crm" },
           { label: "Loyalty", tone: "crm" },
           { label: "Pay-link", tone: "crm" }
@@ -133,6 +167,8 @@ export function ArchitectureDrawer() {
               </button>
             </header>
 
+            <p className="border-b bg-slate-50 px-5 py-3 text-sm text-slate-600">{flow.intro}</p>
+
             <div className="flex flex-wrap gap-2 border-b px-5 py-3">
               {flowKeys.map((key) => (
                 <button
@@ -165,6 +201,26 @@ export function ArchitectureDrawer() {
               </div>
               <h3 className="mt-4 font-semibold">{step.title}</h3>
               <p className="mt-1 text-sm text-slate-600">{step.text}</p>
+              {step.does && step.does.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">What it does</p>
+                  <ul className="mt-1 list-disc pl-5 text-sm text-slate-600">
+                    {step.does.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {step.how && step.how.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">How it flows</p>
+                  <ul className="mt-1 list-disc pl-5 text-sm text-slate-600">
+                    {step.how.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <a
                 href="/architecture-walkthrough.html"
                 target="_blank"
